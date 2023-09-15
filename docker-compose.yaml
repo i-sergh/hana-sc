@@ -9,7 +9,7 @@ services:
     #volumes:    
     # - ./api/app/:/app
     ports:
-     - 8778:80
+     - 8998:80
     networks:
      - pyHanaNet
 
