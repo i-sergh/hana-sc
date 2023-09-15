@@ -1,0 +1,87 @@
+{% extends "base.html"%}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', path='table.css') }}"> 
+<script>
+    async function getTableStructure() {
+        table_name = document.getElementById('InputTbMame').value;
+    
+        
+         console.log('here')
+         url = 'http://127.0.0.1:8778/pages/struct/' + table_name;
+         var form = document.createElement("form"); 
+         $(form).attr("id", "reg-form").attr("name", "reg-form").attr("action", url).attr("method", "post").attr("enctype", "multipart/form-data");
+         document.body.appendChild(form);
+         form.submit();
+         document.body.removeChild(form);
+         
+                    
+         return false;
+}
+</script>
+{% endblock %}
+
+{% block header %}
+<div class="input-menu">
+ 
+
+    <input id="InputTbMame" type="text" placeholder="Table name">
+    <button class="submit-btn" onclick="getTableStructure()">
+        Find table!
+    </button> 
+</div>
+{% endblock %}
+
+
+{% block content %}
+
+{% if results %}
+
+
+
+<p>
+    Search for table columns {{results.table_name}}
+</p>
+<p>
+    Found {{results.cols|length}} items
+</p> 
+
+
+
+    <table>
+        
+            <tr>
+                
+                <th class="table-header">Column Name</th>
+                <th class="table-header">Data Type</th>
+                <th class="table-header">Data length</th>
+                
+            </tr>
+        
+        {%for col in  results.cols%}
+        
+        {% if col[-1]|int % 2 == 0 %}
+        <tr>
+            <td class="even tdleft" >{{ results.cols[col].name }}</td>
+            <td class="even tdleft" >{{ results.cols[col].dtype }}</td>
+            <td class="even tdcenter" >{{ results.cols[col].primary_key }}</td>
+        </tr>
+    
+        {% else %}
+        <tr>
+            <td class="odd tdleft" >{{ results.cols[col].name }}</td>
+            <td class="odd tdleft" >{{ results.cols[col].dtype }}</td>
+            <td class="odd tdcenter" >{{ results.cols[col].primary_key }}</td>
+        </tr>
+        {%endif%}
+        {%endfor%}
+        
+        
+    
+    </table> 
+{% endif %}  
+   
+
+  
+    
+{% endblock %}

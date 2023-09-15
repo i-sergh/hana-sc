@@ -1,0 +1,37 @@
+table{
+    
+  position: relative;
+  border-collapse: collapse; 
+  z-index: -1;
+}
+
+
+.table-header{
+    position: sticky;
+    top: 5rem;
+    background-color: rgba(238, 130, 238, 0.747);
+}
+
+td{
+    margin: 10px;
+    padding: 10px; 
+    color: #e3c3ff;
+    
+}
+
+
+.even{
+    background-color: #dab3ff13;
+}
+
+.odd{
+    background-color: #dab3ff3c;
+}
+
+.tdleft{
+    text-align: left;
+}
+
+.tdcenter{
+    text-align: center;   
+}

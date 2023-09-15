@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terralink - Sergh</title>
+    <link rel="icon" type="image/x-icon" href="https://terralink.ru/favicon.ico">
+    <link rel="stylesheet" href="{{ url_for('static', path='base.css') }}">
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+
+    
+    {% block head %}{% endblock %}
+</hea0d>
+<body>
+    <div class="site_header site_header__"> 
+        <img src="https://terralink.ru/upload/iblock/f22/9iskbjfj7hs0tj53lx5371l4l1cpq4wt.svg">  
+    
+        {% block header %}{% endblock %}
+        <hr> 
+    </div>
+    <div class="site_header__">
+    </div>
+
+    {% block content %}
+    {% endblock %}
+</body>
+</html>
