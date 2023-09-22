@@ -28,7 +28,7 @@ hr{
 
 .site_header{
     position: fixed;
-
+    display: flex;
     background: #dab3ff;
         
     
