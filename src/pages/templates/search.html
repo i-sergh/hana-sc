@@ -45,6 +45,7 @@
 
     function AddWordToInput(word){
         document.getElementById("InputSearch").value = word;
+        document.getElementById("InputSearchForm").action = "/pages/struct/" + word;
         document.getElementById("InputSearchForm").submit();
     }
 
