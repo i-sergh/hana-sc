@@ -32,3 +32,17 @@ hr{
         
     
 }
+
+.site_header{
+    position: fixed;
+    display: flex;
+    background: #dab3ff;
+        
+    
+}
+
+.other_header_elements{
+    display: flex;
+    align-items: center;
+    margin-left: 20px;
+}

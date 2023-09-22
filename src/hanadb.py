@@ -13,7 +13,7 @@ engine = create_engine(HANA_URL)
 
 SessionHana = sessionmaker(autoflush=False, bind=engine)
 
-Inspector = inspect(engine)
+""" Inspector = inspect(engine) """
 
 def get_session():
     with SessionHana() as session:

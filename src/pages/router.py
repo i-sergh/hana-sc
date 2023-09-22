@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Request, Depends
 from fastapi.templating import Jinja2Templates
-from starlette.responses import RedirectResponse
 
 from hana.router import get_table_structure
 

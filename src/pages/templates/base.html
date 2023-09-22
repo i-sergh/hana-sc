@@ -14,10 +14,12 @@
 </hea0d>
 <body>
     <div class="site_header site_header__"> 
-        <img src="https://terralink.ru/upload/iblock/f22/9iskbjfj7hs0tj53lx5371l4l1cpq4wt.svg">  
-    
-        {% block header %}{% endblock %}
-        <hr> 
+        <div class="header_logo">
+            <img  src="https://terralink.ru/upload/iblock/f22/9iskbjfj7hs0tj53lx5371l4l1cpq4wt.svg">  
+        </div>
+        <div class="other_header_elements">
+            {% block header %}{% endblock %}
+        </div>
     </div>
     <div class="site_header__">
     </div>

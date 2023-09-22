@@ -5,7 +5,7 @@ from sqlalchemy.exc import DBAPIError
 from hana.models import HanaMARA
 
 from hana.schema2json.schema2json import get_test_json, test_get_empty_json, _fill_by_schema
-from hanadb import get_session, Inspector
+from hanadb import get_session
 from hana.schema2json.prettyStatus.prettyStatusHTTP import StatusCode
 
 from hana.schema2json.jsonBase import JSONData, JSONStruct
@@ -82,6 +82,7 @@ def get_all_dtypes(session=Depends(get_session)):
 
 @router.post('/table-struct' )
 def get_table_structure(table_name:str,session=Depends(get_session)):
+    table_name = table_name.upper()
     if table_name == "":
         return { 'code': StatusCode(400).code(),
              'status':StatusCode(400).status(),

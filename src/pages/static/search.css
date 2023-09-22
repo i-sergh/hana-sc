@@ -1,0 +1,135 @@
+:root{
+    --search-row-height: 2em;
+    --search-row-width: 30em;
+}
+
+.search_menu_box{
+    display: block;
+    
+}
+
+.searchbox{
+    width: var(--search-row-height);
+    background-color: rgba(212, 0, 255, 0.15); 
+    transition: 0.2s;
+}
+
+.searchbox:hover{
+    background-color: rgba(204, 255, 0, 0);
+}
+
+.searchbox:hover + .result_box {
+    visibility: visible;
+    /* height: var(--search-row-height); */ 
+    background-color: rgba(86, 43, 226, 0.355);    
+}
+
+
+.search_box_element{
+    width: var(--search-row-width);
+    height: var(--search-row-height);
+}
+
+
+form{
+    width: 100%;
+    height: 100%; 
+}
+
+input{
+    width: 100%;
+    height: 100%; 
+    background-color: rgba(255, 0, 0, 0);
+    outline: none;
+    border: none;
+}
+
+.input_search{
+    display: flex;
+    width: 100%;
+    height: 100%;
+    background-color: transparent; 
+    transition: 0.2s;
+    border: none;
+    
+}
+
+
+.input_search:hover{
+    width: 100%;
+    height: 100%;
+    outline: 2px solid rgb(255, 47, 220);
+}
+/* .input_search:focus{
+    outline: 2px solid rgb(26, 0, 40);
+} */
+
+.result_box{
+    visibility: hidden;
+    display: inline;
+    position: absolute;
+    background-color: rgba(221, 255, 0, 0.537);
+    transition: 0.3s;
+    transition-delay: 0.3s;
+    width: var(--search-row-width);
+    
+    /* height: 0em; */
+    
+}
+
+
+ul{
+    padding: 0;
+}
+
+li{
+    list-style-type: none;
+    
+}
+
+.li_search{
+    font-size: 0em;
+    visibility: hidden;
+    color:rgb(22, 15, 43);
+    transition-delay: 0.9s;
+    transition: 0.2s;
+}
+/*ахереть оно работает */
+.searchbox:hover + .result_box ul li .li_search{
+    visibility: visible;
+    color:rgb(132, 0, 255);
+    font-size: 1em;
+}
+.result_box:hover{
+    visibility: visible;
+    background-color: rgba(86, 43, 226, 0.355);    
+}
+
+.result_box:hover ul li .li_search{
+    visibility: visible;
+    color:rgb(153, 0, 255);
+    font-size: 1em;
+}
+
+.result_box ul li{
+    padding: 5px;
+    padding-left: 15px;
+    margin: 3px;
+    transition: 0.2s;
+    background-color: rgba(0, 255, 255, 0.512);
+}
+
+.result_box ul li:hover{
+    padding-left: 30px;
+    background-color: rgba(217, 47, 255, 0.457);
+}
+
+
+.result_box ul li:hover .li_search{
+    color: #b7e7ff;
+}
+
+input{
+    caret-color: rgb(171, 0, 154);
+}
+

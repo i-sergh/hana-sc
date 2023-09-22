@@ -1,0 +1,78 @@
+{% extends "base.html"%}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', path='search.css') }}"> 
+<script>
+    function Test(){
+        console.log("Me Changing" + document.getElementById("InputSearch").value);
+    }
+
+    function ClearUL(){
+        const ul = document.getElementById('ResultList');
+        ul.innerHTML = '';
+    }
+    
+    function Add2UL(word){
+        const ul = document.getElementById('ResultList');
+        /* let word = document.getElementById("InputSearch").value; */
+        document.getElementById('ResultList').innerHTML += ('<li id="'+word+'" onclick="AddWordToInput(this.id)"> <span class="li_search">'+word+' </span></li>');
+    }
+
+    async function getSearchData(){
+        word = document.getElementById("InputSearch").value;
+        console.log(word);
+        url = '/api/search/find?inpt=' + word;
+        await fetch(url).then((response) => response.json()) //2
+            .then((data) => {
+                console.log(data);
+                 response_data = data['data'];
+                 FillUL(response_data); //3
+                 searchInGoogle();
+                 });
+    }
+
+    function FillUL(data){
+        ClearUL();
+        for (const element of data) {
+            Add2UL(element);
+        }
+    }
+
+    function searchInGoogle(){
+        word = document.getElementById("InputSearch").value;
+        document.getElementById("InputSearchForm").action = "/pages/struct/" + word;
+    }
+
+    function AddWordToInput(word){
+        document.getElementById("InputSearch").value = word;
+        //console.log(word);
+    }
+
+
+
+</script>
+
+{% block head_in_search%} {% endblock %}
+
+{% endblock %}
+
+{% block header %}
+<div class="search_menu_box">
+    <form id="InputSearchForm"  method="post" action="">
+    <div class="searchbox search_box_element">
+        
+        <div class="input_search">  
+            
+                <!-- onchange="Add2UL()"  ondblclick="ClearUL()" -->
+                <input id="InputSearch" type="text" autocomplete="off" placeholder="my search"  oninput="getSearchData()" >
+            
+        </div>
+    </div>
+    <div class="result_box">
+        <ul id="ResultList">
+            
+        </ul>
+    </div>
+</form>
+</div>
+{% endblock %}
