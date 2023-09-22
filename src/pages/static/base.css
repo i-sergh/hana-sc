@@ -18,6 +18,7 @@ hr{
     border-top:3px solid #8749c0
 }
 .site_header__{
+    display: flex;
     top: 0px;
     margin: 0;
     padding: 0;
