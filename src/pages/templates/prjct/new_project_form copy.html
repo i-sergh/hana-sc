@@ -1,0 +1,60 @@
+{% extends "base.html"%}
+
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', path='prjct/new_project_form.css') }}"> 
+{% endblock %}
+
+{% block content %}
+<h1>
+    {{data.prjct_name}}
+</h1>
+
+<h2>
+    {{data.prjct_description}}
+</h2>
+
+<div class="form_wrapper" tabindex="-1">
+    <div class="form_wrapper_header form_wrapper_connection_empty">
+        <h2>Source base connection</h2>
+    </div>
+    <form action="/pages/test" method="post">
+        <div class="input_form" value="HELLO">
+            <input type="text" placeholder="host" name="host" >
+        </div>
+        <div class="input_form" >
+            <input type="text" placeholder="port" name="port" >
+        </div>
+        <div class="input_form" >
+            <input type="text" placeholder="user" name="user" >
+        </div>
+        <div class="input_form" >
+            <input type="password" placeholder="pass" name="pwd" >
+        </div>
+        <div class="input_form input_form_submit" >
+            <input type="submit" value="Submit">
+        </div>
+    </form>
+</div>
+
+<div class="form_wrapper form_wrapper_connection_failed"  tabindex="0">
+    <h2>Target base connection</h2>
+    <form action="/pages/test" method="post">
+        <div class="input_form" >
+            <input type="text" placeholder="host" name="host" required>
+        </div>
+        <div class="input_form" >
+            <input type="text" placeholder="port" name="port" required>
+        </div>
+        <div class="input_form" >
+            <input type="text" placeholder="user" name="user" required>
+        </div>
+        <div class="input_form" >
+            <input type="password" placeholder="pass" name="pwd" required>
+        </div>
+        <div class="input_form input_form_submit" >
+            <input type="submit" value="Submit">
+        </div>
+    </form>
+</div>
+{% endblock %}

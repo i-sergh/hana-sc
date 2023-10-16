@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 
 from sqlalchemy import insert, select, delete, update
 
-from data_storage.models import UseProject
+from data_storage.models import UseProject, UseConnect
 from storage_pgdb import get_async_session
 from datetime import datetime
 
@@ -54,3 +54,20 @@ async def update_project_description(name:str, desc:str='', session=Depends(get_
     await session.execute(sql)
     await session.commit()
     return {'result':'success'}
+
+@router.post('/create-connection')
+async def create_connection(prjct_name:str, name:str, requirements:str, 
+                      host:str="", port:str="", db_name:str="",
+                      db_schema:str="", user:str="", pwd:str="",
+                      api_key:str="", session=Depends(get_async_session)):
+    sql = select(UseProject.prjct_name).join()
+    result = await session.execute(sql)
+    print(result.all())
+
+    """ select * from connections left join projects on connections.prjct_id = projects.id where prjct_name='name1';
+ """
+
+    """ sql = insert(UseConnect).\
+        values( prjct_name=prjct_name, prjct_description=prjct_desc, created_at=datetime.now()) """
+    
+    return{'response': '0k'}

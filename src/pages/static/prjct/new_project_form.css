@@ -1,0 +1,232 @@
+
+
+.form_wrapper{
+    margin-bottom: 2rem;
+    display: block;
+    margin-right: 5px;
+    background: linear-gradient(90deg, rgba(218,179,255,0.30) 0%, rgba(218,179,255,1) 50%, rgba(218,179,255,0.30) 100%);    
+    transition: 0.3s;
+    width: 100%;
+    height: 80px;
+    overflow: hidden;
+}
+
+.form_wrapper_connection_empty{
+    border: 6px solid transparent;
+}
+
+.form_wrapper_connection{
+    border: 6px solid #f66f4a;
+}
+
+
+.form_wrapper_connection_failed{
+    border: 6px solid red;
+}   
+
+.form_wrapper_connection_succeeded{
+    border: 6px solid green;
+}
+
+.form_wrapper:hover{
+    height: 580px;
+} 
+
+
+.form_wrapper h2{
+    text-align: center;
+    color: #222244;
+}   
+
+.form_content{
+
+    display: flex;
+    padding: 5px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    background: linear-gradient(90deg, rgba(218,179,255,0.30) 0%, rgba(218,179,255,1) 50%, rgba(218,179,255,0.30) 100%);    
+
+}
+
+.form_wrapper form input{
+    margin: 5px;
+}
+
+input{
+    width: 100%;
+    height: 100%; 
+    padding: 4px;
+    background-color: rgba(255, 0, 0, 0);
+    outline: 2px solid #f66f4a;
+    border: none; 
+    transition: 0.2s;
+}
+
+input:invalid {
+    
+  }
+
+input:focus{
+    /* background-color: tomato; */
+     border: 1px solid #f66f4a; 
+     
+}
+
+.input_form{
+    /* padding: 10px; */
+    padding-bottom: 10px;
+    padding-right: 10px;
+    margin: 5px; 
+    background-color: #e4cbfd; 
+    width: 200px; 
+    
+}
+.input_form input{
+    font-size: 14pt;
+}
+
+.input_form_submit input{
+    font-size: 14pt; 
+}
+
+.input_form_submit{
+    margin-top: 7px;
+}
+
+
+.add_connection_block{
+    display: flex;
+    background-color: #f66f4a;
+}
+.add_connection_botton_text_wrapper{
+    position: absolute;
+    margin-left: 100px;
+    transform: translateY(15px);
+    display: flex;
+    color: transparent;
+    background-color: transparent;
+    border-radius: 10px;
+    padding: 10px;
+    transition: 0.7s;
+    pointer-events: none;
+    font-family:  'Poppins', sans-serif;
+}
+
+.add_connection_button{
+    display: flex;
+    margin-left: 100px;
+    background-color: aqua;
+    width: 100px;
+    height: 100px;
+    overflow: hidden;
+    border-radius: 50%;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 8px 8px 5px #222244;
+    cursor: pointer;
+}
+
+.button_text{
+
+    text-align:center;
+    font-size: 9pt;
+    font-weight: bold;
+    
+}
+.add_connection_button:hover + .add_connection_botton_text_wrapper{
+    color: #285870;
+    background-color: aqua;
+    transform: translateX(70px) translateY(15px);
+
+
+}
+
+
+.plus{
+    
+    position: absolute;
+    text-align:center;
+    color:#4a9af6;
+    font-size: 40pt;
+    font-weight: bolder;
+    transition: 0.3s;
+    user-select: none;
+    font-family: sans-serif;
+}
+.add_connection_button:hover .plus{
+    transform: rotate(90deg);
+    color:#f66f4a;
+}
+
+.add_connection_button:active{
+    box-shadow: 4px 4px 10px #222244;
+    transform: scaleX(95%) scaleY(95%);
+    
+}
+
+.form_connections_container{
+    background-color: #4a9af6;
+    
+    min-height: 200px;
+}
+.form_header_content{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.buttton_destroy_connection_form{
+    margin-left: 40px;
+    display: flex;
+    background-color: transparent;
+    color:#f6584a;
+    width: 30px;
+    height: 30px;
+    font-size: 18pt;
+    font-weight: bolder;
+    padding: 5px;
+    border-radius: 50%;
+    box-shadow: #f66f4a 2px 2px 2px,  #5e2718 2px 2px 4px;
+    justify-content: center;
+    align-items: center;
+    user-select: none;
+}
+
+.buttton_destroy_connection_form:active{
+    box-shadow: none;
+    color:#ed3120;
+    transform: scaleX(95%) scaleY(95%);
+}
+
+.input_form_header{
+    width: 400px;
+    height: 40px;
+    margin-left: 100px;
+    background-color: transparent;
+}
+
+.input_form_header input{
+    font-size: 20pt;
+    font-weight: 700; 
+    
+}
+
+
+.input_header{
+    background-color: #e4cbfd;
+    
+}
+
+.input_header:not(:placeholder-shown){
+    background-color: transparent;
+    border: none;
+    outline: none;
+    box-shadow: -4px 4px #f66f4a;
+  }
+
+  .input_header:focus{
+    outline: 2px solid #f66f4a;
+    border: 1px solid #f66f4a;
+  }

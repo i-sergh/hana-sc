@@ -1,0 +1,80 @@
+{% extends "search.html"%}
+
+{% block head_in_search %}
+<link rel="stylesheet" href="{{ url_for('static', path='prjct/start_page.css') }}"> 
+
+<script>
+    var lastOpt;
+    function choiseMenuOption(event, opt){
+        
+        clearMenuSelection();
+        
+        if (opt == lastOpt){
+            lastOpt = null;
+            return null;
+        }
+        lastOpt = opt;
+        // show necessary content
+        document.getElementById(opt).style.display = "flex";
+        // hilight necessary btn
+        event.currentTarget.className += " btn_active";
+    }
+
+    function clearMenuSelection(){
+        var i, tabcontent, tablinks;
+        // clear all tab content visibilities (use display=none)
+        tabcontent = document.getElementsByClassName("form_container");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+        }
+        // clear all button
+        tablinks = document.getElementsByClassName("tab_btn");
+        for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(" btn_active", "");
+        }
+    }
+    
+</script>
+{% endblock %}
+
+
+{% block content %}
+
+<div class="menu_container">
+    <div class="tab_btns_container">
+        <div class="tab_btn" onclick="choiseMenuOption(event, 'opt1')">
+            Create
+        </div>
+        <div class="tab_btn" onclick="choiseMenuOption(event, 'opt2')">
+            Open
+        </div>
+    </div>
+
+    <div class="forms_menu_container">
+        <div id="opt1" class="form_container form_container1">
+            <form action="/pages/prjct/new-project" method="post">
+                <div class="input_form" >
+                    <!-- Добавить проверку на уникальность имени -->
+                    <!-- Добавить скрипт проверки по введению -->
+                    <input name="prjct_name" type="text" placeholder="Project Name" required>
+                </div>
+                <div class="input_form" >
+                    <input name="prjct_description" type="text" placeholder="Project Description">
+                </div>
+                <div class="input_form input_form_submit">
+                    <input type="submit" value="Create!">
+                </div>
+            </form>
+        </div>
+        <div id="opt2" class="form_container form_container2">
+            <div class="input_form">
+                <input type="text">
+            </div>
+            <div class="input_form">
+                <input type="text">
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

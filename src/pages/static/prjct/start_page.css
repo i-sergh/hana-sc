@@ -1,0 +1,98 @@
+
+
+.menu_container{
+    
+    margin-top: 2rem ;
+    margin-left: 2rem ;
+    width: 700px;
+    
+    background: linear-gradient(90deg, #dab3ff, #dab3ff00);
+}
+
+.tab_btns_container{
+    display:flex;
+    width: 100%;
+
+    /* background-color: blue; */
+}
+
+.tab_btn{
+    padding: 20px;
+    margin-right: 5px;
+    display:flex;
+    color: tomato;
+    align-items: center;
+    background-color: lightgreen;
+    transition: 0.5s;
+    cursor: pointer;
+}
+
+.tab_btn:hover{
+    background-color: tomato;
+    color: lightgreen;
+}
+
+.btn_active{
+    background-color: tomato;
+    color: lightgreen;
+}
+
+.forms_menu_container{
+    position: relative;
+    width: 100%;
+    
+    background-color: rgb(161, 111, 207);
+}
+
+.form_container{
+    display: none;
+    position: absolute;
+    width: 100%;
+}
+
+.form_container form{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.form_container1{
+    background: rgb(2,0,36);
+    background: linear-gradient(90deg, rgba(2,0,36,0) 0%, rgba(255,177,0,1) 93%, rgba(255,25,0,0) 100%);}
+.form_container2{
+    background: rgb(14,0,255);
+    background: linear-gradient(90deg, rgba(14,0,255,1) 0%, rgba(0,83,255,1) 11%, rgba(255,25,0,0) 100%); 
+}
+
+.input_form{
+    padding: 10px;
+    margin: 5px;
+    background-color: aqua;
+    width: 200px; 
+    
+}
+.input_form input{
+    font-size: 16pt;
+}
+
+.input_form_submit{
+
+    margin-top: 20px;
+    transition: 0.5;
+}
+
+.input_form_submit:hover{
+    background-color: tomato;
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-top: 15px;
+    margin-top: 15px;
+}
+.input_form_submit:hover{
+    background-color: tomato;
+}
+.input_form_submit:active {
+ background-color: lightgreen;
+ padding: 10px;
+ margin-top: 20px;
+}

@@ -1,0 +1,109 @@
+{% extends "base.html"%}
+
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', path='prjct/new_project_form.css') }}"> 
+
+<script>
+    
+    /* https://stackoverflow.com/questions/73356104/how-to-prevent-page-reload-on-form-input-with-fastapi
+       https://developer.mozilla.org/en-US/docs/Web/API/FormData/FormData
+    */
+    function submitForm(event){
+        // получать информацию о каждой форме через эвент
+        var data = new FormData(event.target);
+        data.append("prjct_name", "{{data.prjct_name}}")
+        console.log(data);
+        url = '/pages/prjct/new-connection'
+         fetch(url, {
+            method: 'POST',
+            body: data,
+        }).then(response => response.text())
+        .then(return_data => console.log(return_data))
+        .catch(error => {
+                    console.error(error);
+                }); 
+        event.preventDefault();
+    }
+    
+    function addNewConnectionForm(){
+        container = document.getElementsByClassName('form_connections_container')[0];
+        template = document.getElementById("connectionTemplate");
+        container.appendChild(template.content.cloneNode(true));
+    }
+
+</script>
+{% endblock %}
+
+{% block content %}
+<h1>
+    {{data.prjct_name}}
+</h1>
+
+<h2>
+    {{data.prjct_description}}
+</h2>
+
+<div class="add_connection_block">
+    
+    <div class="add_connection_button" onclick="addNewConnectionForm()">
+            <span class="plus">+</span>
+        </div>
+    <div class="add_connection_botton_text_wrapper">
+        <span class="button_text">New connection</span>
+    </div>
+</div>
+
+
+<div class="form_connections_container">
+
+</div>
+
+<template id="connectionTemplate">
+    <div class="form_wrapper" tabindex="-1">
+        <form class="ConnectForm" action="" onsubmit="submitForm(event)" >
+            <div class="form_wrapper_header form_wrapper_connection_empty">
+                <div class="form_header_content">
+                    
+                    <div class="input_form_header input_form " >
+                        <input class="input_header" type="text" placeholder="New source connection name" name="name" required>
+                    </div>
+
+                    <div class="buttton_destroy_connection_form"
+                    onclick="this.parentNode.parentNode.parentNode.parentNode.remove()">
+                        x
+                    </div>
+                </div>
+            </div>
+       
+            <div class="form_content">
+                <div class="input_form">
+                    <input type="text" placeholder="host" name="host" >
+                </div>
+                <div class="input_form" >
+                    <input type="text" placeholder="port" name="port" >
+                </div>
+                <div class="input_form" >
+                    <input type="text" placeholder="database name" name="db_name" >
+                </div>
+                <div class="input_form" >
+                    <input type="text" placeholder="database schema" name="db_schema" >
+                </div>
+                <div class="input_form" >
+                    <input type="text" placeholder="user" name="user" >
+                </div>
+                <div class="input_form" >
+                    <input type="password" placeholder="pass" name="pwd" >
+                </div>
+                <div class="input_form" >
+                    <input type="password" placeholder="API key" name="api_key" >
+                </div>
+                <div class="input_form input_form_submit" >
+                    <input type="submit" value="Submit">
+                </div>
+            </div>
+        </form>
+    </div>
+</template>
+
+{% endblock %}
