@@ -59,6 +59,7 @@ input{
     height: 100%; 
     padding: 4px;
     background-color: rgba(255, 0, 0, 0);
+    color: #222244;
     outline: 2px solid #f66f4a;
     border: none; 
     transition: 0.2s;
@@ -230,3 +231,30 @@ input:focus{
     outline: 2px solid #f66f4a;
     border: 1px solid #f66f4a;
   }
+
+  input:disabled{
+    color: #222244;
+  }
+
+  .input_form_disabled{
+    padding-bottom: 10px;
+    padding-right: 10px;
+    margin: 5px; 
+    background-color: none;
+    width: 200px;
+  }
+
+  .input_form_disabled input{
+    font-size: 14pt;
+}
+
+
+.form_wrapper_{
+    margin-bottom: 2rem;
+    display: block;
+    margin-right: 5px;
+    background: linear-gradient(90deg, rgba(218,179,255,0.30) 0%, rgba(218,179,255,1) 50%, rgba(218,179,255,0.30) 100%);    
+    transition: 0.3s;
+    width: 100%;    
+}
+

@@ -56,6 +56,69 @@
 
 
 <div class="form_connections_container">
+    {% for connection in  data.connections%}
+        <div class="form_wrapper_" tabindex="-1">
+                <div class="form_wrapper_header form_wrapper_connection_empty">
+                    <div class="form_header_content">
+                        
+                        <div class="input_form_header input_form " >
+                            <input class="input_header" type="text" value="{{connection['cn_name']}}" name="name" disabled>
+                        </div>
+
+                        <div class="buttton_destroy_connection_form"
+                        onclick="this.parentNode.parentNode.parentNode.remove()">
+                            x
+                        </div>
+                    </div>
+                </div>
+        
+                <div class="form_content">
+                    {% if connection['cn_host'] %}
+                    <div class="input_form_disabled">
+                        <input type="text" value="{{connection['cn_host']}}"  name="host"  disabled>
+                    </div>
+                    {% endif %}
+
+                    {% if connection['cn_port'] %}
+                    <div class="input_form_disabled" >
+                        <input type="text" value="{{connection['cn_port']}}" name="port"  disabled>
+                    </div>
+                    {% endif %}
+
+                    {% if connection['cn_db']%}
+                    <div class="input_form_disabled" >
+                        <input type="text" value="{{connection['cn_db']}}" name="db_name" disabled>
+                    </div>
+                    {% endif %}
+
+                    {% if connection['cn_schema'] %}
+                    <div class="input_form_disabled" >
+                        <input type="text" value="{{connection['cn_schema']}}" name="db_schema" disabled>
+                    </div>
+                    {% endif %}
+
+                    {% if connection['cn_user'] %}
+                    <div class="input_form_disabled" >
+                        <input type="text" value="{{connection['cn_user']}}" name="user" disabled>
+                    </div>
+                    {% endif %}
+
+                    {% if connection['cn_pwd'] %}
+                    <div class="input_form_disabled" >
+                        <input type="password" value="{{connection['cn_pwd']}}" name="pwd" disabled>
+                    </div>
+                    {% endif %}
+
+                    {% if connection['cn_apikey'] %}
+                    <div class="input_form_disabled" >
+                        <input type="password" value="{{connection['cn_apikey']}}" name="api_key" disabled>
+                    </div>
+                    {% endif %}
+                </div>
+        </div>
+
+
+    {% endfor %}
 
 </div>
 

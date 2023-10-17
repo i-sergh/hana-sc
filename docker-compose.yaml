@@ -12,6 +12,18 @@ services:
      - 8998:8000
     networks:
      - pyHanaNet
-
+  hschema_postgres_db:
+    image: postgres:15-alpine
+    container_name: hschema_postgres_db
+    volumes:
+      - hschema_postgres_data:/var/lib/postgresql/data/
+    ports:
+      - "5435:5432"
+    environment:
+       POSTGRES_USER: root
+       POSTGRES_PASSWORD: root
+       POSTGRES_DB: storage_db
+    networks:
+      - pyHanaNet
 networks:
   pyHanaNet:
