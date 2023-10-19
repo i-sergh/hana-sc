@@ -1,15 +1,24 @@
 version: "3.8"
 
+## src/main.py -> change 
+# uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
+## to 
+# uvicorn.run("main:app", host="0.0.0.0", port=80, reload=True)
+
+## create src/.env if not created
+
+## postgres not obvious things
+#  PG_HOST=hschema_postgres_db
+#  PG_PORT=5432
+
 services:
   server:
     build: 
       context: .
       dockerfile: Dockerfile
     container_name: api_hana_server  
-    #volumes:    
-    # - ./api/app/:/app
     ports:
-     - 8998:8000
+     - 8998:80
     networks:
      - pyHanaNet
   hschema_postgres_db:
@@ -27,3 +36,5 @@ services:
       - pyHanaNet
 networks:
   pyHanaNet:
+volumes:
+  hschema_postgres_data:
