@@ -13,16 +13,22 @@
         // получать информацию о каждой форме через эвент
         var data = new FormData(event.target);
         data.append("prjct_name", "{{data.prjct_name}}")
-        console.log(data);
+        
+        data_dict = {};
+        for(let [name, value] of data) {
+            data_dict[name] = value;    
+            }
+        
         url = '/pages/prjct/new-connection'
          fetch(url, {
             method: 'POST',
             body: data,
-        }).then(response => response.text())
-        .then(return_data => console.log(return_data))
+        }).then(response => response.status)
+        .then(status => {if (status==200){addFilledConnectionForm(data_dict)} })
         .catch(error => {
                     console.error(error);
                 }); 
+        event.target.parentNode.remove()
         event.preventDefault();
     }
     
@@ -30,6 +36,26 @@
         container = document.getElementsByClassName('form_connections_container')[0];
         template = document.getElementById("connectionTemplate");
         container.appendChild(template.content.cloneNode(true));
+    }
+
+    function addFilledConnectionForm(data_dict){
+        container = document.getElementsByClassName('form_connections_container')[0];
+        template = document.getElementById("filledConnectionTemplate");
+        newForm = template.content.cloneNode(true);
+        newForm.querySelectorAll("input[name]")[0].value = data_dict['name'].trim();
+        newForm.querySelectorAll('input[name=host]')[0].value = data_dict['host'].trim();
+        newForm.querySelectorAll('input[name=port]')[0].value = data_dict['port'].trim();
+        newForm.querySelectorAll('input[name=db_name]')[0].value = data_dict['db_name'].trim();
+        newForm.querySelectorAll('input[name=db_schema]')[0].value = data_dict['db_schema'].trim();
+        newForm.querySelectorAll('input[name=user]')[0].value = data_dict['user'].trim();
+        newForm.querySelectorAll('input[name=pwd]')[0].value = data_dict['pwd'].trim();
+        newForm.querySelectorAll('input[name=api_key]')[0].value = data_dict['api_key'].trim();
+        items = newForm.querySelectorAll("input");
+        for (i = 0; i< items.length; ++i)
+            if (!items[i].value){
+                items[i].parentNode.remove();
+            }
+        container.appendChild(newForm);
     }
 
 </script>
@@ -116,10 +142,7 @@
                     {% endif %}
                 </div>
         </div>
-
-
     {% endfor %}
-
 </div>
 
 <template id="connectionTemplate">
@@ -166,6 +189,55 @@
                 </div>
             </div>
         </form>
+    </div>
+</template>
+
+
+<template id="filledConnectionTemplate">
+    <div class="form_wrapper_" tabindex="-1">
+            <div class="form_wrapper_header form_wrapper_connection_empty">
+                <div class="form_header_content">
+                    
+                    <div class="input_form_header input_form " >
+                        <input class="input_header" type="text"  name="name" disabled>
+                    </div>
+
+                    <div class="buttton_destroy_connection_form"
+                    onclick="this.parentNode.parentNode.parentNode.remove()">
+                        x
+                    </div>
+                </div>
+            </div>
+    
+            <div class="form_content">
+                <div class="input_form_disabled">
+                    <input type="text"   name="host"  disabled>
+                </div>
+
+                <div class="input_form_disabled" >
+                    <input type="text"  name="port"  disabled>
+                </div>
+
+                <div class="input_form_disabled" >
+                    <input type="text"  name="db_name" disabled>
+                </div>
+
+                <div class="input_form_disabled" >
+                    <input type="text"  name="db_schema" disabled>
+                </div>
+
+                <div class="input_form_disabled" >
+                    <input type="text"  name="user" disabled>
+                </div>
+
+                <div class="input_form_disabled" >
+                    <input type="password" name="pwd" disabled>
+                </div>
+
+                <div class="input_form_disabled" >
+                    <input type="password" name="api_key" disabled>
+                </div>
+            </div>
     </div>
 </template>
 
