@@ -20,7 +20,8 @@ services:
     ports:
      - 8998:80
     networks:
-     - pyHanaNet
+       pyHanaNet:
+          ipv4_address: 172.16.5.2
   hschema_postgres_db:
     image: postgres:15-alpine
     container_name: hschema_postgres_db
@@ -33,8 +34,15 @@ services:
        POSTGRES_PASSWORD: root
        POSTGRES_DB: storage_db
     networks:
-      - pyHanaNet
+       pyHanaNet:
+          ipv4_address: 172.16.5.3
 networks:
-  pyHanaNet:
+  pyHanaNet: # 172.16.5.x
+    driver: bridge
+    ipam:
+      config:
+        -
+          subnet: 172.16.5.0/24
+          gateway: 172.16.5.1
 volumes:
   hschema_postgres_data:
