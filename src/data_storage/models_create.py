@@ -15,6 +15,7 @@ class ProjectCreate(StoragePgBase):
     prjct_name = Column(String, nullable=False, unique=True)
     prjct_description = Column(String)
     created_at = Column(TIMESTAMP, nullable=False)
+    last_used_at = Column(TIMESTAMP, nullable=False)
 
 class ConnectionCreate(StoragePgBase):
     __tablename__ = "connections"

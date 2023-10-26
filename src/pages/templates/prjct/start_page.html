@@ -34,6 +34,43 @@
         }
     }
     
+    function getResultsFromSearchQuery(query){
+        url = '/data/retrieve-search-results?search_query='+query;
+        fetch(url, {
+            method: 'GET',
+        })
+        .then(response =>response.json())
+        .then(data=> {if (data['result'].length)
+        clearOpenResults();
+            data['result'].forEach( (res) =>{
+                addResultString(res);
+            })
+        })
+        .catch(error => {
+                    console.error(error);
+                });
+    }
+
+    function clearOpenResults(){
+        document.getElementById('openResults').innerHTML = '';
+    }
+
+    function addResultString(data){
+        container = document.getElementById('openResults');
+        template = document.getElementById("openResult");
+        resultBlock = template.content.cloneNode(true);
+        resultBlock.querySelectorAll(".toOpenPrjct")[0].action = "/pages/prjct/open-project?prjct_name=" + data["prjct_name"];
+        resultBlock.querySelectorAll(".result_project_name")[0].innerHTML = data["prjct_name"];
+        resultBlock.querySelectorAll(".result_project_description")[0].innerHTML = data["prjct_description"];
+        resultBlock.querySelectorAll(".result_project_date")[0].innerHTML = data["created_at"];
+        
+        container.appendChild(resultBlock);
+
+    }
+
+    function finalyOpenProject(link){
+        link.querySelectorAll(".toOpenPrjct")[0].submit();
+    }
 </script>
 {% endblock %}
 
@@ -67,14 +104,65 @@
             </form>
         </div>
         <div id="opt2" class="form_container form_container2">
-            <div class="input_form">
-                <input type="text">
-            </div>
-            <div class="input_form">
-                <input type="text">
+            <div class="open_container">
+                <div class="open_search_container">
+                    <div class="input_form">
+                        <input type="search" oninput="getResultsFromSearchQuery(this.value)">
+                    </div>
+                </div>
+                <div id="openResults" class="open_results">
+                    {% for line in data.result %}
+                    <a class="link_to_project" onclick="finalyOpenProject(this)">
+                        <form class="toOpenPrjct" method="post" action="/pages/prjct/open-project?prjct_name={{line["prjct_name"]}}"></form>
+                        <div class="result_prjct_block">
+                            <div class="result_overflow">
+                                
+                            </div>
+                            <div class="result_project">
+                                <p>
+                                    <span class="result_project_name">
+                                        {{line["prjct_name"]}}
+                                    </span>
+                                    <span class="result_project_description">
+                                        {{line["prjct_description"]}}
+                                    </span>
+                                </p>
+                            </div> 
+                            
+                            <div class="result_project_date">
+                                {{line["created_at"]}}
+                            </div>
+                        </div>
+                    </a>
+                    {%endfor%}
+                </div>
             </div>
         </div>
     </div>
 </div>
+
+<template id="openResult">
+    <a class="link_to_project" onclick="finalyOpenProject(this)">
+        <form class="toOpenPrjct" method="post" action=""></form>
+        <div class="result_prjct_block">
+            <div class="result_overflow">    
+            </div>
+            <div class="result_project">
+                <p>
+                    <span class="result_project_name">
+                        1
+                    </span>
+                    <span class="result_project_description">
+                        2
+                    </span>
+                </p>
+            </div> 
+            
+            <div class="result_project_date">
+                3
+            </div>
+        </div>
+    </a>
+</template>
 
 {% endblock %}

@@ -1,11 +1,13 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 
 from sqlalchemy import insert, select, delete, update
 from sqlalchemy.sql.expression import literal
 
 from data_storage.models import UseProject, UseConnect
-from storage_pgdb import get_async_session
+from storage_pgdb import get_async_session, async_session_maker
+
 from datetime import datetime
+from functools import wraps
 
 
 router = APIRouter(
@@ -16,10 +18,43 @@ router = APIRouter(
 @router.post('/create-project')
 async def create_project(prjct_name:str, prjct_desc:str=None, session=Depends(get_async_session)):
     sql = insert(UseProject).\
-        values( prjct_name=prjct_name, prjct_description=prjct_desc, created_at=datetime.now())
+        values( prjct_name=prjct_name, prjct_description=prjct_desc, created_at=datetime.now(), last_used_at=datetime.now())
     await session.execute(sql)
     await session.commit()
-    return {'result':'success'}
+    return {'message':'success'}
+
+@router.patch('/project-touched')
+async def project_touched(prjct_name:str, session=Depends(get_async_session)):
+    """
+    Called when project has been changing or opening
+    """
+    sql = update(UseProject).where(UseProject.prjct_name==prjct_name).values(last_used_at=datetime.now())
+    result = await session.execute(sql)
+    await session.commit()
+    if result.rowcount:
+        print(prjct_name + ': Data updated successful')
+        return {'message': 'Data updated successful'}
+    else:
+        print('no project named ' + prjct_name)
+        return {'message': 'no project named ' + prjct_name}
+
+## UTILS
+def touch_project(func):
+    """
+    Called when project has been changing or opening
+    """
+    @wraps(func)
+    async def wrapper(prjct_name:str, *args, **kwargs):
+        async with async_session_maker() as session_:
+            sql = update(UseProject).where(UseProject.prjct_name==prjct_name).values(last_used_at=datetime.now())
+            result = await session_.execute(sql)
+            await session_.commit()
+            if result.rowcount:
+                print(prjct_name + "'s data successfuly updated")
+            else:
+                print("No project named " + prjct_name + '\n Nothing to update')
+        return await func(prjct_name, *args, **kwargs)
+    return wrapper
 
 @router.get('/get-project-info')
 async def get_project_info_by_name(name:str, session=Depends(get_async_session)):
@@ -27,10 +62,44 @@ async def get_project_info_by_name(name:str, session=Depends(get_async_session))
             where(UseProject.prjct_name==name)
     result = await session.execute(sql)
     result_list = list(result.all()[0])
-    
     return {'result':result_list}
 
+@router.get('/last-five-projects')
+async def get_last_five_projects(session=Depends(get_async_session)):
+    sql = select(UseProject.prjct_name, UseProject.prjct_description, UseProject.created_at).\
+          order_by(UseProject.last_used_at.desc()).limit(5)
+    result_sql = (await session.execute(sql)).all()
+    result = []
+    for line in result_sql:
+        res_line = {}
+        res_line['prjct_name'] = line[0]
+        res_line['prjct_description'] = line[1]
+        res_line['created_at'] = line[2]
+        result.append(res_line.copy())
+        
+    return {"result": result}
+
+@router.get('/retrieve-search-results')
+async def retrieve_search_results(search_query:str, max_results:int=5, session=Depends(get_async_session)):
+    
+
+    sql = select(UseProject.prjct_name, UseProject.prjct_description, UseProject.created_at).\
+          where(UseProject.prjct_name.contains(search_query)).\
+          order_by(UseProject.last_used_at.desc()).limit(max_results)
+    print(sql)
+    result_sql = (await session.execute(sql)).all()
+    result = []
+    for line in result_sql:
+        res_line = {}
+        res_line['prjct_name'] = line[0]
+        res_line['prjct_description'] = line[1]
+        res_line['created_at'] = line[2]
+        result.append(res_line.copy())
+        
+    return {"result": result}
+
 @router.get('/get-project-and-connections')
+@touch_project
 async def get_project_and_connections(prjct_name:str, session=Depends(get_async_session)):
     """
         Return statuses:
@@ -38,11 +107,12 @@ async def get_project_and_connections(prjct_name:str, session=Depends(get_async_
             - found empty : db has project with name <prjct_name>, but there is no connections in it;
             - found       : db contains project with name <prjct_name> and this project has nonempty list of connections.
     """
+    
+
     sql = select(UseProject.prjct_name, UseProject.prjct_description, UseConnect)\
           .join(UseConnect, UseProject.id==UseConnect.prjct_id, full=True)\
           .where(UseProject.prjct_name == prjct_name)
     result = (await session.execute(sql)).all()
-    
     if not result:
         return {
             'project status': 'no project',
@@ -90,14 +160,18 @@ async def delete_project_by_name(name:str, session=Depends(get_async_session)):
     sql = delete(UseProject).where(UseProject.prjct_name==name)
     await session.execute(sql)
     await session.commit()
-    return {'result':'success'}
+    return {'message':'success'}
 
 @router.patch('/update-project-description')
-async def update_project_description(name:str, desc:str='', session=Depends(get_async_session)):
-    sql = update(UseProject).where(UseProject.prjct_name==name).values(prjct_description=desc)
+@touch_project
+async def update_project_description(prjct_name:str, desc:str='', session=Depends(get_async_session)):
+    sql = update(UseProject).where(UseProject.prjct_name==prjct_name).values(prjct_description=desc)
     await session.execute(sql)
     await session.commit()
-    return {'result':'success'}
+    #touch_project(prjct_name)
+    return {'message':'success'}
+
+## connection
 
 @router.post('/create-connection')
 async def create_connection(prjct_name:str, name:str, requirements:str, 
@@ -133,7 +207,7 @@ async def create_connection(prjct_name:str, name:str, requirements:str,
     await session.execute(sql)
     await session.commit()
     
-    return{'response': '0k'}
+    return{'message': '0k'}
     
     
     

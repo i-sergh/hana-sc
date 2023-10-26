@@ -11,7 +11,6 @@ class Tables:
                 result[0] = name
             elif word in name and len(result ) < 10:
                 result.append(name)
-            
         return result
 
 

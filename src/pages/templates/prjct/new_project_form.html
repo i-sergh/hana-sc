@@ -18,9 +18,8 @@
         for(let [name, value] of data) {
             data_dict[name] = value;    
             }
-        
         url = '/pages/prjct/new-connection'
-         fetch(url, {
+        fetch(url, {
             method: 'POST',
             body: data,
         }).then(response => response.status)
@@ -70,13 +69,26 @@
     {{data.prjct_description}}
 </h2>
 
-<div class="add_connection_block">
-    
-    <div class="add_connection_button" onclick="addNewConnectionForm()">
-            <span class="plus">+</span>
-        </div>
-    <div class="add_connection_botton_text_wrapper">
-        <span class="button_text">New connection</span>
+<div class="menu_block">
+    <div class="menu_button_block">
+        
+        <div class="menu_button back_menu" onclick="location.href='/';">
+                <span class="menu_button_text back_symbol"><</span>
+                <div class="menu_botton_subtext_wrapper">
+                    <span class="button_subtext">Previous step</span>
+                </div>
+            </div>
+        
+    </div>
+    <div class="menu_button_block">
+        
+        <div class="menu_button add_connection_menu" onclick="addNewConnectionForm()">
+                <span class="menu_button_text plus">+</span>
+                <div class="add_connection menu_botton_subtext_wrapper">
+                    <span class="button_subtext">New connection</span>
+                </div>
+            </div>
+        
     </div>
 </div>
 
