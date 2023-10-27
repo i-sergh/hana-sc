@@ -61,7 +61,6 @@
         prjct_name = "{{data.prjct_name}}";
         connection_name = btn.parentNode.querySelectorAll("input.input_header")[0].value;
         url=`/data/delete-connection?prjct_name=${prjct_name}&c0nnection_name=${connection_name}`;
-        console.log(url);
         fetch(url, {
             method: 'DELETE',
         }); 
