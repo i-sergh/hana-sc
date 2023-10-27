@@ -20,7 +20,7 @@ class ProjectCreate(StoragePgBase):
 class ConnectionCreate(StoragePgBase):
     __tablename__ = "connections"
     id = Column(Integer, primary_key=True, autoincrement=True)
-    prjct_id = Column(Integer, ForeignKey('projects.id'))
+    prjct_id = Column(Integer, ForeignKey('projects.id', ondelete="CASCADE"))
     cn_requirements = Column(String) 
     cn_name = Column(String)
     cn_host = Column(String)
@@ -30,7 +30,7 @@ class ConnectionCreate(StoragePgBase):
     cn_db = Column(String)
     cn_schema = Column(String)
     cn_apikey = Column(String) 
-    person = relationship(ProjectCreate)
+    prjcts = relationship(ProjectCreate)
 
 
     

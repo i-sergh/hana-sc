@@ -209,6 +209,19 @@ async def create_connection(prjct_name:str, name:str, requirements:str,
     
     return{'message': '0k'}
     
+@router.delete('/delete-connection')   
+async def delete_connection(prjct_name:str, c0nnection_name:str,
+                             session=Depends(get_async_session)):
+    #  delete from connections where prjct_id  = (select id from projects where prjct_name='nasd');
+
+    subquery = select(UseProject.id).where(UseProject.prjct_name==prjct_name).scalar_subquery()
+    query = delete(UseConnect).where((UseConnect.prjct_id == subquery)\
+                                      & (UseConnect.cn_name==c0nnection_name))
+    await session.execute(query)
+    await session.commit()
+    return{'message': '0k'}
+    
+    
     
     
     ## usefull explorations 

@@ -42,6 +42,8 @@ def to_a_new_project(request:Request, prjct_name:Annotated[str, Form()],\
                                                                               'connections':  response['project connections']
                                                                             }})
 
+
+## TODO: DECORATOR NO SPACE IN STRING ENSHUER 
 @router.post('/open-project')
 def to_a_new_project(request:Request, prjct_name:str):
     response = call_get_project_and_connections(request, prjct_name).json()

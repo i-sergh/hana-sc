@@ -57,6 +57,15 @@
         container.appendChild(newForm);
     }
 
+    function deleteConnection(btn){
+        prjct_name = "{{data.prjct_name}}";
+        connection_name = btn.parentNode.querySelectorAll("input.input_header")[0].value;
+        url=`/data/delete-connection?prjct_name=${prjct_name}&c0nnection_name=${connection_name}`;
+        console.log(url);
+        fetch(url, {
+            method: 'DELETE',
+        }); 
+    }
 </script>
 {% endblock %}
 
@@ -104,7 +113,7 @@
                         </div>
 
                         <div class="buttton_destroy_connection_form"
-                        onclick="this.parentNode.parentNode.parentNode.remove()">
+                        onclick="deleteConnection(this);this.parentNode.parentNode.parentNode.remove()">
                             x
                         </div>
                     </div>
@@ -167,7 +176,7 @@
                         <input class="input_header" type="text" placeholder="New source connection name" name="name" required>
                     </div>
 
-                    <div class="buttton_destroy_connection_form"
+                    <div class="buttton_destroy_connection_form" 
                     onclick="this.parentNode.parentNode.parentNode.parentNode.remove()">
                         x
                     </div>
@@ -215,7 +224,7 @@
                     </div>
 
                     <div class="buttton_destroy_connection_form"
-                    onclick="this.parentNode.parentNode.parentNode.remove()">
+                    onclick="deleteConnection(this);this.parentNode.parentNode.parentNode.remove()">
                         x
                     </div>
                 </div>
