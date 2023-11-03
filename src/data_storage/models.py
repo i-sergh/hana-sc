@@ -2,6 +2,9 @@ from sqlalchemy import Column, String, Integer, TIMESTAMP, ForeignKey
 
 from storage_pgdb import Base as StoragePgBase
 
+from pydantic import BaseModel, Field
+from typing import Any, Dict, AnyStr, List, Union
+
 
 class UseProject(StoragePgBase):
     __tablename__ = "projects"
@@ -24,3 +27,14 @@ class UseConnect(StoragePgBase):
     cn_db = Column(String)
     cn_schema = Column(String)
     cn_apikey = Column(String) 
+
+
+
+class UseSession(StoragePgBase):
+    __tablename__ = "sessions"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    prjct_id = Column(Integer, ForeignKey('projects.id'))
+    connection_id = Column(Integer, ForeignKey('connections.id'))
+    user_id = Column(String) # TODO: make users
+    created_at = Column(TIMESTAMP, nullable=False)
+    last_used_at = Column(TIMESTAMP, nullable=False)

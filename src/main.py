@@ -8,6 +8,7 @@ from pages.router import router as pages_router
 from search_drv.router import router as search_drv_router
 from data_storage.router import router as data_storage_router
 from create_prjct_pages.router import router as create_project_router
+from connections.router import router as connections_router
 
 app = FastAPI(
     title="HANA SCHEMA"
@@ -20,6 +21,7 @@ app.include_router(pages_router)
 app.include_router(search_drv_router)
 app.include_router(data_storage_router)
 app.include_router(create_project_router)
+app.include_router(connections_router)
 app.mount('/static', StaticFiles(directory='pages/static'), name='static')
 
 @app.get('/ping')

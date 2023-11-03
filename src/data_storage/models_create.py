@@ -32,6 +32,15 @@ class ConnectionCreate(StoragePgBase):
     cn_apikey = Column(String) 
     prjcts = relationship(ProjectCreate)
 
-
+class SessionCreate(StoragePgBase):
+    __tablename__ = "sessions"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    prjct_id = Column(Integer, ForeignKey('projects.id', ondelete="CASCADE"))
+    connection_id = Column(Integer, ForeignKey('connections.id', ondelete="CASCADE"))
+    user_id = Column(String) # TODO: make users
+    created_at = Column(TIMESTAMP, nullable=False)
+    last_used_at = Column(TIMESTAMP, nullable=False)
+    prjcts = relationship(ProjectCreate)
+    prjcts = relationship(ConnectionCreate)
     
 
