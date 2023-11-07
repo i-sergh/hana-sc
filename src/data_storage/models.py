@@ -2,9 +2,6 @@ from sqlalchemy import Column, String, Integer, TIMESTAMP, ForeignKey
 
 from storage_pgdb import Base as StoragePgBase
 
-from pydantic import BaseModel, Field
-from typing import Any, Dict, AnyStr, List, Union
-
 
 class UseProject(StoragePgBase):
     __tablename__ = "projects"

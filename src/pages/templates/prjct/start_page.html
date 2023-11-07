@@ -1,6 +1,7 @@
-{% extends "search.html"%}
+{% extends "base.html"%}
 
-{% block head_in_search %}
+{% block head_in_base %}
+<link rel="stylesheet" href="{{ url_for('static', path='search.css') }}"> 
 <link rel="stylesheet" href="{{ url_for('static', path='prjct/start_page.css') }}"> 
 
 <script>
