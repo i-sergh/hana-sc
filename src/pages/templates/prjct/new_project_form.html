@@ -66,6 +66,42 @@
         }); 
     }
 
+    function checkTables(btn){
+        const prjct_name = "{{data.prjct_name}}";
+        const connection_name = btn.parentNode.querySelectorAll("input.input_header")[0].value;
+        const container = btn.parentNode.parentNode.parentNode;
+        const url=`/session/check-tables?prjct_name=${prjct_name}&cn_name=${connection_name}`;
+        btn.className = "buttton__connection_form connection_check_content_processing";
+        //btn.querySelectorAll("sup")[0].innerHTML = "*";
+        btn.querySelectorAll("sup")[0].className = "connection_check_inner connection_check_content_processing_inner";
+        //    "NAME": "${container.querySelectorAll('input[name=db_name]')[0].value}",
+        //    "SCHEMA": "${container.querySelectorAll('input[name=db_schema]')[0].value}"
+        
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        }).then(response=>{ 
+            response.json().then(
+                result=> {
+                    console.log(result);
+                    if(result["result"])
+                        {
+                            btn.className = "buttton__connection_form connection_check_content_success";
+                            //btn.querySelectorAll("sup")[0].innerHTML = "✔";
+                            btn.querySelectorAll("sup")[0].className = "connection_check_inner";
+                        } 
+                    else{
+                            btn.className = "buttton__connection_form connection_check_content_fail";
+                            //btn.querySelectorAll("sup")[0].innerHTML = "✖";
+                            btn.querySelectorAll("sup")[0].className = "connection_check_inner";
+                    }
+                    
+            }) }); 
+    }
+
     function checkConnection(btn){
         const prjct_name = "{{data.prjct_name}}";
         const connection_name = btn.parentNode.querySelectorAll("input.input_header")[0].value;
@@ -75,15 +111,6 @@
         btn.className = "buttton__connection_form connection_check_content_processing";
         btn.querySelectorAll("sup")[0].innerHTML = "*";
         btn.querySelectorAll("sup")[0].className = "connection_check_inner connection_check_content_processing_inner";
-        let data = `{
-            "USER": "${container.querySelectorAll("input[name=user]")[0].value}",
-            "PASS": "${container.querySelectorAll('input[name=pwd]')[0].value}",
-            "HOST": "${container.querySelectorAll('input[name=host]')[0].value}",
-            "PORT": "${container.querySelectorAll('input[name=port]')[0].value}",
-            "NAME": "",
-            "SCHEMA":"",
-            "APIKEY":""
-        }`;
         //    "NAME": "${container.querySelectorAll('input[name=db_name]')[0].value}",
         //    "SCHEMA": "${container.querySelectorAll('input[name=db_schema]')[0].value}"
         
@@ -92,8 +119,7 @@
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
-            }, 
-            body: data
+            }
         }).then(response=>{ 
             response.json().then(
                 result=> {
@@ -106,12 +132,14 @@
                         } 
                     else{
                             btn.className = "buttton__connection_form connection_check_content_fail";
-                            btn.querySelectorAll("sup")[0].innerHTML = "✞";
+                            btn.querySelectorAll("sup")[0].innerHTML = "✖";
                             btn.querySelectorAll("sup")[0].className = "connection_check_inner";
                     }
                     
             }) }); 
     }
+
+
 </script>
 {% endblock %}
 
@@ -150,11 +178,11 @@
 
 <div class="form_connections_container">
     {% for connection in  data.connections%}
-        <div class="form_wrapper_ " tabindex="-1">
+        <div class="form_wrapper_" tabindex="-1">
                 <div class="form_wrapper_header">
                     <div class="form_header_content">
                         
-                        <div class="input_form_header input_form " >
+                        <div class="input_form_header input_form" >
                             <input class="input_header" type="text" value="{{connection['cn_name']}}" name="name" disabled>
                         </div>
 
@@ -164,6 +192,17 @@
                             [<sup class="connection_check_inner">?</sup>]
                         </div>
                         
+                        <div class="buttton__connection_form connection_check_content_undef"
+                        onclick="checkTables(this)">
+                            |<sup class="connection_check_inner">-|-</sup>|
+                        </div>
+
+                        <div class="buttton__connection_form" onclick="document.getElementsByName('goTo{{connection['cn_name']}}Form')[0].submit()">
+                            ->
+                            <form name="goTo{{connection['cn_name']}}Form" action="/pages/struct/{{data.prjct_name}}/{{connection['cn_name']}}/" method='post'>
+                            </form>
+                        </div>
+
                         <div class="buttton__connection_form"
                         onclick="deleteConnection(this);this.parentNode.parentNode.parentNode.remove()">
                             x

@@ -2,10 +2,92 @@
 
 {% block head_in_search %}
 <link rel="stylesheet" href="{{ url_for('static', path='table.css') }}"> 
+<link rel="stylesheet" href="{{ url_for('static', path='prjct/new_project_form.css') }}"> 
+
+<script>
+    function checkConnection(btn){
+        const prjct_name = "{{prjct_name}}";
+        const connection_name = "{{cn_name}}";
+        const btn_content = btn.querySelectorAll(".menu_button_text")[0];
+        const type_drv = "HANA";
+        const url=`/session/new-und-check?prjct_name=${prjct_name}&cn_name=${connection_name}&cn_type=${type_drv}`;
+        btn_content.className = "menu_button_text check_connection connection_check_content_processing";
+        btn_content.querySelectorAll(".connection_check_inner")[0].innerHTML = "*";
+        btn_content.querySelectorAll(".connection_check_inner")[0].className = "connection_check_inner connection_check_content_processing_inner";
+               
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        }).then(response=>{ 
+            response.json().then(
+                result=> {
+                    console.log(result);
+                    if(result["result"])
+                        {
+                            btn_content.className = "menu_button_text check_connection connection_check_content_success";
+                            btn_content.querySelectorAll(".connection_check_inner")[0].innerHTML = "✔";
+                            btn_content.querySelectorAll(".connection_check_inner")[0].className = "connection_check_inner";
+                        } 
+                    else{
+                            btn_content.className = "menu_button_text check_connection connection_check_content_fail";
+                            btn_content.querySelectorAll(".connection_check_inner")[0].innerHTML = "✖";
+                            btn_content.querySelectorAll(".connection_check_inner")[0].className = "connection_check_inner";
+                    }
+                    
+            }) }); 
+    }
+    
+</script>
 {% endblock %}
 
 
 {% block content %}
+<h1>{{prjct_name}} / {{cn_name}}
+</h1>
+<h2>
+    status:
+    
+    has
+    {%if not is_session %} 
+     no 
+    {%endif%}
+    session ::
+    
+    has 
+    {%if not has_schema%}
+    no 
+    {%endif%}
+     schema
+</h2>
+
+<div class="menu_block">
+    <div class="menu_button_block">
+        
+        <div class="menu_button back_menu" onclick="document.getElementById('backForm').submit()">
+                <span class="menu_button_text back_symbol"><</span>
+                <div class="menu_botton_subtext_wrapper">
+                    <span class="button_subtext">Previous step</span>
+                </div>
+            </div>
+        
+    </div>
+    <div class="menu_button_block">
+        
+        <div class="menu_button add_connection_menu" onclick="checkConnection(this)">
+                <span class="menu_button_text check_connection connection_check_content_undef">
+                    [<span class="connection_check_inner">?</span>]
+                </span>
+                <div class="add_connection menu_botton_subtext_wrapper">
+                    <span class="button_subtext">Check connection</span>
+                </div>
+            </div>
+        
+    </div>
+</div>
+
 
 {% if results %}
 
@@ -55,5 +137,6 @@
    
 
   
-    
+<form id='backForm' action='/pages/prjct/open-project?prjct_name={{prjct_name}}' method='post'>
+</form>
 {% endblock %}

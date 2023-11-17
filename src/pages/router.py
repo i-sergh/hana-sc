@@ -3,6 +3,8 @@ from fastapi.templating import Jinja2Templates
 
 from hana.router import get_table_structure
 
+from connections.connection_db import is_connection_session, is_schema_saved
+
 router = APIRouter(
     prefix='/pages',
     tags=['pages']
@@ -20,14 +22,27 @@ def get_start_page(request: Request):
     return templates.TemplateResponse('base.html', 
                                         {'request': request,})
 
-@router.get('/struct/{prjct_name}/{third_thing}/{cn_name}/')
-@router.post('/struct/{prjct_name}/{third_thing}/{cn_name}/')
-def show_table_struct_form(request: Request, third_thing, result = Depends(test_args)): #
+#@router.get('/struct/{prjct_name}/{cn_name}/')
+@router.post('/struct/{prjct_name}/{cn_name}/')
+def show_table_struct_form(request: Request, prjct_name:str, cn_name:str): #
     """Возвращает страницку для получения структуры таблицы"""
-    print(result) 
-    print(third_thing)
+    if not is_connection_session(cn_name=cn_name, prjct_name=prjct_name):
+        return templates.TemplateResponse('table.html', 
+                                        {'request': request,
+                                         'is_session': False,
+                                         'has_schema': False,
+                                         'prjct_name': prjct_name,
+                                         'cn_name': cn_name,
+                                          'results': None})
+
+    already_has_schema = is_schema_saved(prjct_name=prjct_name, cn_name=cn_name)
+    print(already_has_schema)
     return templates.TemplateResponse('table.html', 
                                         {'request': request,
+                                         'is_session': True,
+                                         'has_schema': already_has_schema,
+                                         'prjct_name': prjct_name,
+                                         'cn_name': cn_name,
                                           'results': None})
 
 

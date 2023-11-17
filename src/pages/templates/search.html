@@ -3,10 +3,7 @@
 {% block head_in_base %}
 <link rel="stylesheet" href="{{ url_for('static', path='search.css') }}"> 
 <script>
-    function Test(){
-        console.log("Me Changing" + document.getElementById("InputSearch").value);
-    }
-
+    
     function ClearUL(){
         const ul = document.getElementById('ResultList');
         ul.innerHTML = '';
@@ -20,14 +17,15 @@
 
     async function getSearchData(){
         word = document.getElementById("InputSearch").value;
-        console.log(word);
-        url = '/api/search/find?inpt=' + word;
-        await fetch(url).then((response) => response.json()) //2
+        const prjct_name = "{{prjct_name}}";
+        const connection_name = "{{cn_name}}";
+        url = `/session/find-table?prjct_name=${prjct_name}&cn_name=${connection_name}&word=${word}`;
+        await fetch(url, {method:'POST'}).then((response) => response.json()) //2
             .then((data) => {
                 console.log(data);
-                 response_data = data['data'];
+                 response_data = data['result'];
                  FillUL(response_data); //3
-                 searchInGoogle();
+                 //searchIn();
                  });
     }
 
@@ -38,7 +36,7 @@
         }
     }
 
-    function searchInGoogle(){
+    function searchIn(){
         word = document.getElementById("InputSearch").value;
         document.getElementById("InputSearchForm").action = "/pages/struct/" + word;
     }

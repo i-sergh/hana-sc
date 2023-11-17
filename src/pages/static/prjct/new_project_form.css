@@ -44,12 +44,11 @@ input{
     transition: 0.2s;
 }
 
-input:invalid {
+/* input:invalid {
     
-  }
+  } */
 
 input:focus{
-    /* background-color: tomato; */
      border: 1px solid #f66f4a; 
      
 }
@@ -82,7 +81,6 @@ input:focus{
 .menu_button_block{
     display: flex;
     margin-left: 5vw;
-    /* background-color: blue ; */
     height: 100px;
 }
 
@@ -106,6 +104,7 @@ input:focus{
     pointer-events: none;
     font-family:  'Poppins', sans-serif;
     z-index: 2;
+
 }
 
 
@@ -119,6 +118,7 @@ input:focus{
     justify-content: center;
     box-shadow: 8px 8px 5px #222244;
     cursor: pointer;
+    
 }
 
 
@@ -126,7 +126,7 @@ input:focus{
 
     text-align:center;
     font-size: 11pt;
-    
+    z-index: 4;
 }
 
 .menu_button:hover  .menu_botton_subtext_wrapper{
@@ -144,7 +144,7 @@ input:focus{
     font-weight: bolder;
     transition: 0.3s;
     user-select: none;
-    font-family: sans-serif;
+    font-family: sans-serif; 
     
 }
 .menu_button:hover .menu_button_text{
@@ -153,6 +153,13 @@ input:focus{
 
 .menu_button:hover .plus{
     transform: rotate(90deg);
+    color:#f66f4a;
+}
+
+.menu_button:hover .check_connection{
+    letter-spacing: -10px;
+    position: absolute;
+    transform: translateX(-18px);
     color:#f66f4a;
 }
 
@@ -207,7 +214,7 @@ input:focus{
 }
 
 .connection_check_inner{
-    font-size: 10pt;  
+    font-size: 60%;  
 }
 
 .connection_check_content_undef{
@@ -229,12 +236,12 @@ input:focus{
 
 @keyframes connecting_inner{
     0% {rotate: 0deg;
-        font-size: 5pt;}
+        font-size: 33%;}
     50% {
         rotate: 360deg;
-        font-size: 18pt;}  
+        font-size: 100%;}  
     100%{rotate: 0deg;
-        font-size: 5pt;}
+        font-size: 33%;}
 }
 
 

@@ -1,5 +1,6 @@
 import asyncio
 
+from sqlalchemy import Column, VARCHAR, NVARCHAR, Integer
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import DeclarativeMeta, declarative_base, sessionmaker
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
@@ -15,7 +16,11 @@ print(sys.path)
 from data_storage.models import UseProject, UseConnect, UseSession
 from storage_pgdb import get_async_session, async_session_maker
 
+import pandas as pd
+
 from datetime import datetime
+import os
+
 
 ALL_CONNECTIONS = {}
 
@@ -88,6 +93,35 @@ class HanaConnection():
 
     Base: DeclarativeMeta = declarative_base()
 
+    class HanaTables(Base):
+        __tablename__ = 'TABLES'
+        __table_args__ = {'schema': 'SYS'}
+        
+        TABLE_NAME = Column(VARCHAR, primary_key=True)
+        SCHEMA_NAME = Column(NVARCHAR)
+        IS_TEMPORARY = Column(VARCHAR)
+        TABLE_TYPE = Column(VARCHAR)
+        COMMENTS = Column(NVARCHAR)
+        IS_SYSTEM_TABLE = Column(VARCHAR)
+
+    class HanaColumns(Base):
+        __tablename__ = 'TABLE_COLUMNS'
+        __table_args__ = {'schema': 'SYS'}
+
+        CS_DATA_TYPE_NAME = Column(VARCHAR)
+        LENGTH = Column(Integer)
+        IS_NULLABLE = Column(VARCHAR)
+        SCHEMA_NAME = Column(NVARCHAR, primary_key=True)
+        COLUMN_NAME = Column(NVARCHAR, primary_key=True)
+        TABLE_NAME = Column(NVARCHAR, primary_key=True)
+        DEFAULT_VALUE = Column(NVARCHAR)
+        MAX_VALUE = Column(VARCHAR)
+        MIN_VALUE = Column(VARCHAR)
+        DATA_TYPE_NAME = Column(VARCHAR)
+        DATA_TYPE_ID = Column(Integer)
+        CS_DATA_TYPE_NAME = Column(VARCHAR)
+        CS_DATA_TYPE_ID = Column(Integer)
+
     def __init__(self, USER:str, PASS:str, HOST:str, PORT:str, SCHEMA:str='', *args, **kwargs):
         self.HANA_USER = USER
         self.HANA_PASS = PASS
@@ -116,14 +150,30 @@ class HanaConnection():
     def __str__(self):
         return self.DATABASE_URL    
     
-    def check_connection(self):
+    async def check_connection(self):
         with self.session_maker() as session:
             try:
                 session.connection()
             except  DBAPIError as e:
                 return False
         return True
+    
+    def get_tables_from_db(self):
 
+        with self.get_session() as session: 
+            sql = select(self.HanaTables)
+            result =session.execute(sql).all()
+            #TODO: Might be err, when no results
+            result_list = [result_data[0].__dict__ \
+                           for result_data in result]
+            
+            for result in result_list:
+                if '_sa_instance_state' in result:
+                    result.pop('_sa_instance_state')
+            return result_list
+        #TODO: no connection exception
+
+    
 
 CONNECTION_TYPES = {"HANA": HanaConnection, "PG_ASYNC": AsyncPostgesConnection}
 
@@ -134,9 +184,12 @@ def set_connection_session(prjct_name, cn_name, cn_instance):
     ALL_CONNECTIONS[prjct_name, cn_name] = cn_instance
 
 def delete_connection_session(prjct_name, cn_name):
-    cn = ALL_CONNECTIONS.pop((prjct_name, cn_name))
-    #TODO: do someth with it finaly 
-    del cn
+    if (prjct_name, cn_name) in ALL_CONNECTIONS:
+        cn = ALL_CONNECTIONS.pop((prjct_name, cn_name))
+        #TODO: do someth with it finaly 
+        del cn
+        return True
+    return False
 
 def is_connection_session(prjct_name, cn_name) -> bool:
     if (prjct_name, cn_name) in ALL_CONNECTIONS:
@@ -150,6 +203,29 @@ def get_all_connection_sessions()-> dict:
     for key in r_keys:
         res ["".join([key_part + ", " for key_part in key])] = ALL_CONNECTIONS[key].__str__()
     return res
+
+def is_schema_saved(prjct_name, cn_name): 
+    file_name = prjct_name+"__"+cn_name+".csv"
+    path = "connections/connections_schemas/"+file_name
+    return os.path.isfile(path)
+
+
+
+async def check_connection_session(prjct_name, cn_name):
+    if (prjct_name, cn_name) in ALL_CONNECTIONS:
+        result = await ALL_CONNECTIONS[(prjct_name, cn_name)].check_connection()
+        return result
+    return False
+
+async def clone_names_of_tables(prjct_name, cn_name):
+    # TODO: on any errors return false
+    if not (prjct_name, cn_name) in ALL_CONNECTIONS:
+        return False
+    tables_list_dict = ALL_CONNECTIONS[(prjct_name, cn_name)].get_tables_from_db()
+    path = f'connections/connections_schemas/{prjct_name}__{cn_name}.csv'
+    df = pd.DataFrame.from_dict(tables_list_dict)
+    df.to_csv(path)
+    return True
 """ 
 from sqlalchemy import select
 import sys

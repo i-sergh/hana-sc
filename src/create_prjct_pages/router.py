@@ -27,6 +27,7 @@ def get_start_page(request:Request, last_five_prjcts=Depends(get_last_five_proje
 def to_a_new_project(request:Request, prjct_name:Annotated[str, Form()],\
                       prjct_description:Annotated[str, Form()]=''):
     response = call_get_project_and_connections(request, prjct_name).json()
+    
     if response['project status'] == 'no project':
         call_create_project(request, prjct_name, prjct_description)
         return templates.TemplateResponse('prjct/new_project_form.html', {'request':request,
@@ -94,7 +95,8 @@ def call_create_connect(request:Request, **kwargs):
 
 def call_get_project_and_connections(request:Request, prjct_name:str):
     HOST = request.base_url
-    print(HOST)
     url = f'{HOST}data/get-project-and-connections?prjct_name={prjct_name}'
+    print(url)
     response = requests.get(url)
     return response
+

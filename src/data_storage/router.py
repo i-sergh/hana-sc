@@ -221,12 +221,50 @@ async def delete_connection(prjct_name:str, c0nnection_name:str,
     await session.commit()
     return{'message': '0k'}
     
-    
-    
-    
+@router.get("/conninfo-by-pname-cname")
+async def get_connection_info_by_prjct_name_cn_name(prjct_name:str, cn_name:str,
+                                       session=Depends(get_async_session)):
+
+    # select * from connections 
+    # where connections.prjct_id =  (select projects.id from projects where projects.prjct_name = 'prjct' )
+    # and connections.cn_name = 'ConnectHana';
+    subquery = select(UseProject.id).where(UseProject.prjct_name==prjct_name).scalar_subquery()
+    sql = select(UseConnect)\
+          .where((UseConnect.prjct_id ==subquery)
+                  & (UseConnect.cn_name == cn_name)) 
+    result_sql = (await session.execute(sql)).all()
+    print(result_sql)
+    try:
+        result_sql = result_sql[0][0].__dict__
+    except:
+        return {}
+    """{
+    'cn_port': 30015,
+    'cn_pwd': 'Resident4',
+    'cn_schema': '', 
+    'cn_host': 'sap-s4h-s01.moscow.terralink', 
+    'cn_user': 'PROSKURIND',
+    'cn_db': '',
+    'cn_apikey': ''}
+    """
+    result = {}
+    result['USER'] = result_sql['cn_user']
+    result['PASS'] = result_sql['cn_pwd']
+    result['HOST'] = result_sql['cn_host']
+    result['PORT'] = result_sql['cn_port']
+    result['NAME'] = result_sql['cn_db']
+    result['SCHEMA'] = result_sql['cn_schema']
+    result['APIKEY'] = result_sql['cn_apikey']
+    print(result)
+    return result
+
+
+
+
+
     ## usefull explorations 
     # how to get many results from query 
-    """ 
+""" 
     result = (await session.execute(sql)).all()
     _ = [res[0].__dict__ for res in result]
     for data in _:
@@ -234,27 +272,27 @@ async def delete_connection(prjct_name:str, c0nnection_name:str,
     """
     
      # query examples:
-    """ SELECT connections.id, connections.prjct_id, connections.cn_requirements,
+""" SELECT connections.id, connections.prjct_id, connections.cn_requirements,
     connections.cn_name, connections.cn_host, connections.cn_port,
     connections.cn_user, connections.cn_pwd, connections.cn_db, connections.cn_schema,
     connections.cn_apikey 
     FROM connections JOIN projects ON connections.prjct_id = projects.id """
     # same as 
-    """ SELECT * FROM connections JOIN projects ON connections.prjct_id = projects.id """
-    """ subquery = select(UseConnect).join(UseProject, UseConnect.prjct_id == UseProject.id)\
+""" SELECT * FROM connections JOIN projects ON connections.prjct_id = projects.id """
+""" subquery = select(UseConnect).join(UseProject, UseConnect.prjct_id == UseProject.id)\
                .where(UseProject.prjct_name == prjct_name) """
     
-    """ subquery = select(UseProject.id, UseConnect.cn_requirements, UseConnect.cn_name,\
+""" subquery = select(UseProject.id, UseConnect.cn_requirements, UseConnect.cn_name,\
                       UseConnect.cn_host, UseConnect.cn_port, UseConnect.cn_user,\
                       UseConnect.cn_pwd, UseConnect.cn_db, UseConnect.cn_schema, UseConnect.cn_apikey)\
                     .where(UseProject.prjct_name==prjct_name) """
 
-    """ select * from connections left join projects on connections.prjct_id = projects.id where prjct_name='name1';"""
+""" select * from connections left join projects on connections.prjct_id = projects.id where prjct_name='name1';"""
 
-    """ sql = insert(UseConnect).\
+""" sql = insert(UseConnect).\
         values( prjct_name=prjct_name, prjct_description=prjct_desc, created_at=datetime.now()) """
     
-    """ insert into connections (prjct_id, cn_name, cn_host)
+""" insert into connections (prjct_id, cn_name, cn_host)
 values ((select id from projects where  projects.prjct_name = 'name2'), 'YACHOOO', 'yandex.ru');
  """    
    
