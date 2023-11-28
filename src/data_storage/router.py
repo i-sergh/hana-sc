@@ -86,7 +86,7 @@ async def retrieve_search_results(search_query:str, max_results:int=5, session=D
     sql = select(UseProject.prjct_name, UseProject.prjct_description, UseProject.created_at).\
           where(UseProject.prjct_name.contains(search_query)).\
           order_by(UseProject.last_used_at.desc()).limit(max_results)
-    print(sql)
+
     result_sql = (await session.execute(sql)).all()
     result = []
     for line in result_sql:
@@ -175,6 +175,7 @@ async def update_project_description(prjct_name:str, desc:str='', session=Depend
 
 @router.post('/create-connection')
 async def create_connection(prjct_name:str, name:str, requirements:str, 
+                      driver:str, is_target:bool,  
                       host:str="", port:str="", db_name:str="",
                       db_schema:str="", user:str="", pwd:str="",
                       api_key:str="", session=Depends(get_async_session)):
@@ -186,6 +187,8 @@ async def create_connection(prjct_name:str, name:str, requirements:str,
     subquery = select(UseProject.id, 
                       literal(name),
                       literal(requirements),
+                      literal(driver),
+                      literal(is_target),
                       literal(host),
                       literal(int(port) if port.isdigit() else None),
                       literal(db_name),
@@ -197,6 +200,8 @@ async def create_connection(prjct_name:str, name:str, requirements:str,
     sql = insert(UseConnect).from_select( ['prjct_id', 
                                            'cn_name',
                                            'cn_requirements',
+                                           'cn_drv',
+                                           'cn_is_target',
                                            'cn_host',
                                            'cn_port',
                                            'cn_db',
@@ -233,7 +238,6 @@ async def get_connection_info_by_prjct_name_cn_name(prjct_name:str, cn_name:str,
           .where((UseConnect.prjct_id ==subquery)
                   & (UseConnect.cn_name == cn_name)) 
     result_sql = (await session.execute(sql)).all()
-    print(result_sql)
     try:
         result_sql = result_sql[0][0].__dict__
     except:
@@ -255,7 +259,7 @@ async def get_connection_info_by_prjct_name_cn_name(prjct_name:str, cn_name:str,
     result['NAME'] = result_sql['cn_db']
     result['SCHEMA'] = result_sql['cn_schema']
     result['APIKEY'] = result_sql['cn_apikey']
-    print(result)
+    
     return result
 
 

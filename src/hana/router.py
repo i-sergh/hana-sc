@@ -84,11 +84,11 @@ def get_all_dtypes(session=Depends(get_session)):
 def get_table_structure(table_name:str,session=Depends(get_session)):
     table_name = table_name.upper()
     if table_name == "":
-        return { 'code': StatusCode(400).code(),
-             'status':StatusCode(400).status(),
-             'table_name': None,
-             'cols':
-                    None
+        return { 
+                 'code': StatusCode(400).code(),
+                 'status':StatusCode(400).status(),
+                 'table_name': None,
+                 'cols': None
             }
     try:
 
@@ -96,7 +96,7 @@ def get_table_structure(table_name:str,session=Depends(get_session)):
         result =session.execute(sql)
 
         result_list = result.all() 
-        #print(result_list)
+        print(result_list)
 
         #print('MARA in ABAPS417', ('MARA',) in result_list) 
         #print('elements in ABAPS417', len(result_list)) 
@@ -113,7 +113,7 @@ def get_table_structure(table_name:str,session=Depends(get_session)):
 
     table.add_cols(result_col_name, result_col_dtype, ())
 
-    print(table.get_data())
+    #print(table.get_data())
     
     SCHEMA_CACHE[table_name] = table
     return table.get_data()

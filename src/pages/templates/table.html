@@ -88,50 +88,45 @@
     </div>
 </div>
 
+<p>
+    Searched for the columns of the {{table_name}} table 
+</p>
+
 
 {% if results %}
-
-
+{%set qty_val = results.result.content[results.result.content|first]|length %}
 
 <p>
-    Search for table columns {{results.table_name}}
-</p>
-<p>
-    Found {{results.cols|length}} items
+    Found {{qty_val}} items
 </p> 
-
-
 
     <table>
         
-            <tr>
-                
-                <th class="table-header">Column Name</th>
-                <th class="table-header">Data Type</th>
-                <th class="table-header">Data length</th>
-                
-            </tr>
-        
-        {%for col in  results.cols%}
-        
-        {% if col[-1]|int % 2 == 0 %}
         <tr>
-            <td class="even tdleft" >{{ results.cols[col].name }}</td>
-            <td class="even tdleft" >{{ results.cols[col].dtype }}</td>
-            <td class="even tdcenter" >{{ results.cols[col].primary_key }}</td>
+            {%for header in  results.result.headers%}
+                <th class="table-header"> | {{header}} | </th>
+            {% endfor %} 
         </tr>
-    
-        {% else %}
-        <tr>
-            <td class="odd tdleft" >{{ results.cols[col].name }}</td>
-            <td class="odd tdleft" >{{ results.cols[col].dtype }}</td>
-            <td class="odd tdcenter" >{{ results.cols[col].primary_key }}</td>
-        </tr>
-        {%endif%}
-        {%endfor%}
         
+        {%for counter in range(qty_val) %}
+            {% if counter % 2 == 0 %}
+                {%set class_td =  "even tdleft" %}
+            {% else %}  
+                {%set class_td =  "odd tdleft" %}
+            {%endif%} 
+               
+                    <tr>
+                        {%for header in  results.result.headers%}
+                            {% if header  == 'IDX' %}
+                                <td class="{{class_td}}" >{{counter + 1}}</td>
+                            {% else %}  
+                                <td class="{{class_td}}" >{{results.result.content[header][counter]}}</td>
+                            {%endif%}
+                        {% endfor %}
+                    </tr>            
         
-    
+        {% endfor %}  
+        
     </table> 
 {% endif %}  
    

@@ -42,8 +42,10 @@
     }
 
     function AddWordToInput(word){
+        const prjct_name = "{{prjct_name}}";
+        const connection_name = "{{cn_name}}";
         document.getElementById("InputSearch").value = word;
-        document.getElementById("InputSearchForm").action = "/pages/struct/" + word;
+        document.getElementById("InputSearchForm").action = `/pages/struct/${prjct_name}/${connection_name}/${word}`;
         document.getElementById("InputSearchForm").submit();
     }
 

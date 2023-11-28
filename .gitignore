@@ -3,3 +3,4 @@ __pycache__
 venv
 .vscode
 /src/connections/connections_schemas/*.csv
+/src/connections/connections_schemas/*/

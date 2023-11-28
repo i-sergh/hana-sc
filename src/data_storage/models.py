@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Integer, TIMESTAMP, ForeignKey
+from sqlalchemy import Column, String, Integer, TIMESTAMP, ForeignKey, Boolean
 
 from storage_pgdb import Base as StoragePgBase
 
@@ -15,10 +15,12 @@ class UseConnect(StoragePgBase):
     __tablename__ = "connections"
     id = Column(Integer, primary_key=True, autoincrement=True)
     prjct_id = Column(Integer,  ForeignKey('projects.id'))
-    cn_requirements = Column(String) 
+    cn_drv = Column(String) 
+    cn_is_target = Column(Boolean)
+    cn_requirements = Column(String)
     cn_name = Column(String)
     cn_host = Column(String)
-    cn_port = Column(Integer)
+    cn_port = Column(String)
     cn_user = Column(String)
     cn_pwd = Column(String)
     cn_db = Column(String)

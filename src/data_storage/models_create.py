@@ -1,4 +1,4 @@
-from sqlalchemy import Column, ForeignKey, Integer, String, TIMESTAMP
+from sqlalchemy import Column, ForeignKey, Integer, String, TIMESTAMP, Boolean
 from sqlalchemy.orm import relationship
 try:
     from storage_pgdb import Base as StoragePgBase
@@ -21,10 +21,12 @@ class ConnectionCreate(StoragePgBase):
     __tablename__ = "connections"
     id = Column(Integer, primary_key=True, autoincrement=True)
     prjct_id = Column(Integer, ForeignKey('projects.id', ondelete="CASCADE"))
+    cn_drv = Column(String, nullable=False) # TODO: make it choosable from list of variants
+    cn_is_target = Column(Boolean, nullable=False, default=False)
     cn_requirements = Column(String) 
     cn_name = Column(String)
     cn_host = Column(String)
-    cn_port = Column(Integer)
+    cn_port = Column(String)
     cn_user = Column(String)
     cn_pwd = Column(String)
     cn_db = Column(String)
@@ -34,7 +36,7 @@ class ConnectionCreate(StoragePgBase):
 
 class SessionCreate(StoragePgBase):
     __tablename__ = "sessions"
-    id = Column(Integer, primary_key=True, autoincrement=True)
+    id = Column( Integer, primary_key=True, autoincrement=True)
     prjct_id = Column(Integer, ForeignKey('projects.id', ondelete="CASCADE"))
     connection_id = Column(Integer, ForeignKey('connections.id', ondelete="CASCADE"))
     user_id = Column(String) # TODO: make users

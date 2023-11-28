@@ -101,8 +101,9 @@ class JSONStruct:
         for ind, col_dtype in enumerate (zip(cols, dtypes)): 
             col, dtype = col_dtype
             if col in self._cols_names:
-                print("Col", col, "already exists" )
-                print(f'use alter_col to change col\'s values')
+                pass
+                #print("Col", col, "already exists" )
+                #print(f'use alter_col to change col\'s values')
             else:
                 #create new col
                 self.cols['col'+ str(self._cols_counter)] = self._col_temp.copy()
@@ -115,7 +116,7 @@ class JSONStruct:
                 self._comparison_name_col[col] = 'col'+str(self._cols_counter)
                 self._cols_sequense.append(col)
 
-                print("Col", col, "created as", 'col'+ str(self._cols_counter))
+                #print("Col", col, "created as", 'col'+ str(self._cols_counter))
                 
                 self._cols_counter += 1
 

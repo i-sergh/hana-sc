@@ -1,24 +1,25 @@
 from fastapi import APIRouter, Request
 
-from connections.search_drv import get_columns
+from connections.search_drv import find_table_columns_by_part_name, headers_from_df,\
+                                    content_from_df
 
 from connections.connection_db import set_connection_session,\
     get_connection_session, get_all_connection_sessions,\
     is_connection_session, CONNECTION_TYPES,\
     is_schema_saved, delete_connection_session,\
-    check_connection_session, clone_names_of_tables
+    check_connection_session, clone_names_of_tables,\
+    clone_names_of_columns, get_KEY_COL_for_tables,\
+    get_HEADERS_for_columns, get_KEY_COL_TABLE_for_columns
+
+import sys
 
 router = APIRouter(
     prefix='/session',
     tags=['Connection']
 )
 
-class Cls:
-    val = 0
 
-def work(cn):
 
-    return True
 
 ##{"HANA_HOST":"sap-s4h-s01.moscow.terralink", "HANA_PORT":"30015","HANA_USER":"PROSKURIND","HANA_PASS":"Resident4"}
 @router.post('/new-und-check')
@@ -70,16 +71,50 @@ async def check_schema_availability(prjct_name:str, cn_name:str):
 @router.post('/check-tables')
 async def check_tables_availability(prjct_name:str, cn_name:str):
     result = await clone_names_of_tables(prjct_name=prjct_name, cn_name=cn_name)
+    result = await clone_names_of_columns(prjct_name=prjct_name, cn_name=cn_name)
     return {"result": result}
 
 @router.post("/find-table")
-async def find_table_from_schema(prjct_name:str, cn_name:str, word:str):
+async def find_table_in_schema(prjct_name:str, cn_name:str, word:str):
     word = word.upper().strip()
-    result = get_columns(prjct_name=prjct_name, cn_name=cn_name, word=word)
+
+    # also checks session availability 
+    key_col = get_KEY_COL_for_tables(prjct_name=prjct_name, cn_name=cn_name)
+    print( await headers_from_df(prjct_name=prjct_name, cn_name=cn_name))
+    if not key_col:
+        print('NO SESSION CONNECTION', file=sys.stderr)
+        return {
+            "message": "no connection",
+            "result": ""
+            }
+    result = await find_table_columns_by_part_name(prjct_name=prjct_name, cn_name=cn_name, key_col=key_col, word=word)
     return {
             "message": "success",
             "result": result
             }
+
+@router.post("/get-table-structure")
+async def get_table_structure(prjct_name:str, cn_name:str, table_name:str):
+    
+    headers = get_HEADERS_for_columns(prjct_name=prjct_name, cn_name=cn_name)
+    key_col = get_KEY_COL_TABLE_for_columns(prjct_name=prjct_name, cn_name=cn_name)
+    content = await content_from_df(prjct_name=prjct_name, cn_name=cn_name,
+                                    headers=headers, key_col=key_col, 
+                                    key_word=table_name, prefix='columns')
+    
+    result = {
+        'headers':headers,
+        'content':content
+    }
+
+    return {
+        'message': 'success',
+        'result':result
+    }
+
+
+
+
 # UTILS 
 
 from sqlalchemy import  select
@@ -108,9 +143,12 @@ async def query_connection_info_by_prjct_name_cn_name( prjct_name:str, cn_name:s
     'cn_db': '',
     'cn_apikey': ''}
     """
+    #print(result_sql)
     result = {}
     result['USER'] = result_sql['cn_user']
     result['PASS'] = result_sql['cn_pwd']
+    result['DRVR'] = result_sql['cn_drv']
+    result['TRGT'] = result_sql['cn_is_target']
     result['HOST'] = result_sql['cn_host']
     result['PORT'] = result_sql['cn_port']
     result['NAME'] = result_sql['cn_db']

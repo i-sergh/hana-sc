@@ -41,6 +41,10 @@
         container = document.getElementsByClassName('form_connections_container')[0];
         template = document.getElementById("filledConnectionTemplate");
         newForm = template.content.cloneNode(true);
+        newForm.querySelectorAll('.goToConnection')[0].setAttribute('onclick',
+        `document.getElementsByName("goTo${data_dict['name'].trim()}Form")[0].submit()`);
+        newForm.querySelectorAll('.goToConnection form')[0].name = `goTo${data_dict['name'].trim()}Form`;
+        newForm.querySelectorAll('.goToConnection form')[0].action = `/pages/struct/{{data.prjct_name}}/${data_dict['name'].trim()}/`;
         newForm.querySelectorAll("input[name=name]")[0].value = data_dict['name'].trim();
         newForm.querySelectorAll('input[name=host]')[0].value = data_dict['host'].trim();
         newForm.querySelectorAll('input[name=port]')[0].value = data_dict['port'].trim();
@@ -106,7 +110,7 @@
         const prjct_name = "{{data.prjct_name}}";
         const connection_name = btn.parentNode.querySelectorAll("input.input_header")[0].value;
         const container = btn.parentNode.parentNode.parentNode;
-        const type_drv = "HANA";
+        const type_drv = btn.parentNode.parentNode.parentNode.querySelectorAll("input[name=drv]")[0].value;
         const url=`/session/new-und-check?prjct_name=${prjct_name}&cn_name=${connection_name}&cn_type=${type_drv}`;
         btn.className = "buttton__connection_form connection_check_content_processing";
         btn.querySelectorAll("sup")[0].innerHTML = "*";
@@ -179,80 +183,87 @@
 <div class="form_connections_container">
     {% for connection in  data.connections%}
         <div class="form_wrapper_" tabindex="-1">
-                <div class="form_wrapper_header">
-                    <div class="form_header_content">
-                        
-                        <div class="input_form_header input_form" >
-                            <input class="input_header" type="text" value="{{connection['cn_name']}}" name="name" disabled>
-                        </div>
+            <div class="form_wrapper_header">
+                <div class="form_header_content">
+                    
+                    <div class="input_form_header input_form" >
+                        <input class="input_header" type="text" value="{{connection['cn_name']}}" name="name" disabled>
+                    </div>
 
-                        <!-- Btns.... -->
-                        <div class="buttton__connection_form connection_check_content_undef"
-                        onclick="checkConnection(this)">
-                            [<sup class="connection_check_inner">?</sup>]
-                        </div>
-                        
-                        <div class="buttton__connection_form connection_check_content_undef"
-                        onclick="checkTables(this)">
-                            |<sup class="connection_check_inner">-|-</sup>|
-                        </div>
+                    <!-- Btns.... -->
+                    <div class="buttton__connection_form connection_check_content_undef"
+                    onclick="checkConnection(this)">
+                        [<sup class="connection_check_inner">?</sup>]
+                    </div>
+                    
+                    <div class="buttton__connection_form connection_check_content_undef"
+                    onclick="checkTables(this)">
+                        |<sup class="connection_check_inner">-|-</sup>|
+                    </div>
 
-                        <div class="buttton__connection_form" onclick="document.getElementsByName('goTo{{connection['cn_name']}}Form')[0].submit()">
-                            ->
-                            <form name="goTo{{connection['cn_name']}}Form" action="/pages/struct/{{data.prjct_name}}/{{connection['cn_name']}}/" method='post'>
-                            </form>
-                        </div>
+                    <div class="buttton__connection_form" onclick="document.getElementsByName('goTo{{connection['cn_name']}}Form')[0].submit()">
+                        ->
+                        <form name="goTo{{connection['cn_name']}}Form" action="/pages/struct/{{data.prjct_name}}/{{connection['cn_name']}}/" method='post'>
+                        </form>
+                    </div>
 
-                        <div class="buttton__connection_form"
-                        onclick="deleteConnection(this);this.parentNode.parentNode.parentNode.remove()">
-                            x
-                        </div>
+                    <div class="buttton__connection_form"
+                    onclick="deleteConnection(this);this.parentNode.parentNode.parentNode.remove()">
+                        x
                     </div>
                 </div>
-        
-                <div class="form_content">
-                    {% if connection['cn_host'] %}
-                    <div class="input_form_disabled">
-                        <input type="text" value="{{connection['cn_host']}}"  name="host"  disabled>
-                    </div>
-                    {% endif %}
-
-                    {% if connection['cn_port'] %}
-                    <div class="input_form_disabled" >
-                        <input type="text" value="{{connection['cn_port']}}" name="port"  disabled>
-                    </div>
-                    {% endif %}
-
-                    {% if connection['cn_db']%}
-                    <div class="input_form_disabled" >
-                        <input type="text" value="{{connection['cn_db']}}" name="db_name" disabled>
-                    </div>
-                    {% endif %}
-
-                    {% if connection['cn_schema'] %}
-                    <div class="input_form_disabled" >
-                        <input type="text" value="{{connection['cn_schema']}}" name="db_schema" disabled>
-                    </div>
-                    {% endif %}
-
-                    {% if connection['cn_user'] %}
-                    <div class="input_form_disabled" >
-                        <input type="text" value="{{connection['cn_user']}}" name="user" disabled>
-                    </div>
-                    {% endif %}
-
-                    {% if connection['cn_pwd'] %}
-                    <div class="input_form_disabled" >
-                        <input type="password" value="{{connection['cn_pwd']}}" name="pwd" disabled>
-                    </div>
-                    {% endif %}
-
-                    {% if connection['cn_apikey'] %}
-                    <div class="input_form_disabled" >
-                        <input type="password" value="{{connection['cn_apikey']}}" name="api_key" disabled>
-                    </div>
-                    {% endif %}
+            </div>
+    
+            <div class="form_content">
+                <div class="input_form_disabled" >
+                    <input type="text" value="{{connection['cn_drv']}}" name="drv"  disabled>
                 </div>
+                <div class="input_form_disabled" >
+                    <input type="text" value="{{connection['cn_is_target']}}" name="is_target"  disabled>
+                </div>
+                
+                {% if connection['cn_host'] %}
+                <div class="input_form_disabled">
+                    <input type="text" value="{{connection['cn_host']}}"  name="host"  disabled>
+                </div>
+                {% endif %}
+
+                {% if connection['cn_port'] %}
+                <div class="input_form_disabled" >
+                    <input type="text" value="{{connection['cn_port']}}" name="port"  disabled>
+                </div>
+                {% endif %}
+
+                {% if connection['cn_db']%}
+                <div class="input_form_disabled" >
+                    <input type="text" value="{{connection['cn_db']}}" name="db_name" disabled>
+                </div>
+                {% endif %}
+
+                {% if connection['cn_schema'] %}
+                <div class="input_form_disabled" >
+                    <input type="text" value="{{connection['cn_schema']}}" name="db_schema" disabled>
+                </div>
+                {% endif %}
+
+                {% if connection['cn_user'] %}
+                <div class="input_form_disabled" >
+                    <input type="text" value="{{connection['cn_user']}}" name="user" disabled>
+                </div>
+                {% endif %}
+
+                {% if connection['cn_pwd'] %}
+                <div class="input_form_disabled" >
+                    <input type="password" value="{{connection['cn_pwd']}}" name="pwd" disabled>
+                </div>
+                {% endif %}
+
+                {% if connection['cn_apikey'] %}
+                <div class="input_form_disabled" >
+                    <input type="password" value="{{connection['cn_apikey']}}" name="api_key" disabled>
+                </div>
+                {% endif %}
+            </div>
         </div>
     {% endfor %}
 </div>
@@ -275,6 +286,12 @@
             </div>
        
             <div class="form_content">
+                <div class="input_form">
+                    <input type="text" placeholder="driver" name="driver" >
+                </div>
+                <div class="input_form">
+                    <input type="checkbox" aria-label="Target base (otherwise sorce base)" name="is_target" >
+                </div>
                 <div class="input_form">
                     <input type="text" placeholder="host" name="host" >
                 </div>
@@ -316,8 +333,18 @@
 
                     <!-- Btns.... -->
                     <div class="buttton__connection_form connection_check_content_undef"
-                        onclick="checkConnection(this)">
+                    onclick="checkConnection(this)">
                         [<sup class="connection_check_inner">?</sup>]
+                    </div>
+                    
+                    <div class="buttton__connection_form connection_check_content_undef"
+                    onclick="checkTables(this)">
+                        |<sup class="connection_check_inner">-|-</sup>|
+                    </div>
+                    <div class="buttton__connection_form goToConnection" onclick="">
+                        ->
+                        <form name="" action="" method='post'>
+                        </form>
                     </div>
 
                     <div class="buttton__connection_form"

@@ -20,11 +20,23 @@ import pandas as pd
 
 from datetime import datetime
 import os
+import errno
 
 
 ALL_CONNECTIONS = {}
 
 #TODO: session destroyer
+
+#
+# TODO TODO TODO      TODO TODO       TODO TODO            TODO TODO       
+#      TODO       TODO         TODO   TODO      TODO   TODO         TODO  TODO 
+#      TODO       TODO         TODO   TODO      TODO   TODO         TODO  TODO   
+#      TODO       TODO         TODO   TODO      TODO   TODO         TODO         Default connections
+#      TODO       TODO         TODO   TODO      TODO   TODO         TODO  TODO  
+#      TODO       TODO         TODO   TODO      TODO   TODO         TODO  TODO 
+#      TODO           TODO TODO       TODO TODO            TODO TODO       
+#      
+
 
 
 class AsyncPostgesConnection():
@@ -84,6 +96,18 @@ class AsyncPostgesConnection():
 
 
 class HanaConnection():
+    
+    # universal constants
+    KEY_COL_FOR_TABLE_SEARCH_IN_TABLES = 'TABLE_NAME'
+    KEY_COL_FOR_TABLE_SEARCH_IN_COLUMNS = 'TABLE_NAME'
+    KEY_COL_FOR_COLUMN_SEARCH = 'COLUMN_NAME'
+    HEADERS_FOR_TABLES_LIST = ['IDX','SCHEMA_NAME', 'TABLE_NAME','TABLE_TYPE',
+                               'IS_TEMPORARY', 'IS_SYSTEM_TABLE', 'COMMENTS']
+    HEADERS_FOR_COLUMNS_LIST = ['IDX','COLUMN_NAME', 'CS_DATA_TYPE_NAME', 'DATA_TYPE_NAME', 'LENGTH',
+                                'DEFAULT_VALUE','MIN_VALUE','MAX_VALUE', 'IS_NULLABLE'] 
+    #'DATA_TYPE_ID',  'TABLE_NAME', 'CS_DATA_TYPE_ID', 'SCHEMA_NAME', 
+    
+
     HANA_USER = ''
     HANA_PASS = ''
     HANA_HOST = ''
@@ -173,7 +197,18 @@ class HanaConnection():
             return result_list
         #TODO: no connection exception
 
-    
+    def get_columns_from_db(self):
+        with self.get_session() as session: 
+            sql = select(self.HanaColumns)
+            result =session.execute(sql).all()
+            #TODO: Might be err, when no results
+            result_list = [result_data[0].__dict__ \
+                           for result_data in result]
+            
+            for result in result_list:
+                if '_sa_instance_state' in result:
+                    result.pop('_sa_instance_state')
+            return result_list
 
 CONNECTION_TYPES = {"HANA": HanaConnection, "PG_ASYNC": AsyncPostgesConnection}
 
@@ -205,9 +240,14 @@ def get_all_connection_sessions()-> dict:
     return res
 
 def is_schema_saved(prjct_name, cn_name): 
-    file_name = prjct_name+"__"+cn_name+".csv"
-    path = "connections/connections_schemas/"+file_name
-    return os.path.isfile(path)
+    folder = prjct_name+"__"+cn_name
+    file_tables = f"tables_{prjct_name}__{cn_name}.csv"
+    file_columns = f"columns_{prjct_name}__{cn_name}.csv"
+    path_tables = f"connections/connections_schemas/{folder}/{file_tables}"
+    path_columns = f"connections/connections_schemas/{folder}/{file_columns}"
+    print(os.path.isfile(path_tables), os.path.isfile(path_columns))
+
+    return os.path.isfile(path_tables) and os.path.isfile(path_columns)
 
 
 
@@ -222,10 +262,63 @@ async def clone_names_of_tables(prjct_name, cn_name):
     if not (prjct_name, cn_name) in ALL_CONNECTIONS:
         return False
     tables_list_dict = ALL_CONNECTIONS[(prjct_name, cn_name)].get_tables_from_db()
-    path = f'connections/connections_schemas/{prjct_name}__{cn_name}.csv'
+    folder = f'{prjct_name}__{cn_name}'
+    file = f'tables_{prjct_name}__{cn_name}.csv'
+    path = f'connections/connections_schemas/{folder}/{file}'
+    # path creation
+    try:
+        os.makedirs(os.path.dirname(path))
+    except OSError as exc: # Guard against race condition
+        if exc.errno != errno.EEXIST:
+            raise
     df = pd.DataFrame.from_dict(tables_list_dict)
-    df.to_csv(path)
+    df['IDX'] = df.index
+    df.to_csv(path, index=False)
     return True
+
+async def clone_names_of_columns(prjct_name, cn_name):
+    # TODO: on any errors return false
+    if not (prjct_name, cn_name) in ALL_CONNECTIONS:
+        return False
+    tables_list_dict = ALL_CONNECTIONS[(prjct_name, cn_name)].get_columns_from_db()
+    folder = f'{prjct_name}__{cn_name}'
+    file = f'columns_{prjct_name}__{cn_name}.csv'
+    path = f'connections/connections_schemas/{folder}/{file}'
+    
+    # path creation
+    try:
+        os.makedirs(os.path.dirname(path))
+    except OSError as exc: # Guard against race condition
+        if exc.errno != errno.EEXIST:
+            raise
+
+    df = pd.DataFrame.from_dict(tables_list_dict)
+    df['IDX'] = df.index
+    df.to_csv(path, index=False)
+    return True
+
+
+def get_HEADERS_for_columns(prjct_name:str, cn_name:str):
+    if not (prjct_name, cn_name) in ALL_CONNECTIONS:
+        return False
+    return ALL_CONNECTIONS[(prjct_name, cn_name)].HEADERS_FOR_COLUMNS_LIST
+
+def get_KEY_COL_for_columns(prjct_name:str, cn_name:str):
+    if not (prjct_name, cn_name) in ALL_CONNECTIONS:
+        return False
+    return ALL_CONNECTIONS[(prjct_name, cn_name)].KEY_COL_FOR_COLUMN_SEARCH
+
+def get_KEY_COL_for_tables(prjct_name:str, cn_name:str):
+    if not (prjct_name, cn_name) in ALL_CONNECTIONS:
+        return False
+    return ALL_CONNECTIONS[(prjct_name, cn_name)].KEY_COL_FOR_TABLE_SEARCH_IN_TABLES
+
+def get_KEY_COL_TABLE_for_columns(prjct_name:str, cn_name:str):
+    if not (prjct_name, cn_name) in ALL_CONNECTIONS:
+        return False
+    return ALL_CONNECTIONS[(prjct_name, cn_name)].KEY_COL_FOR_TABLE_SEARCH_IN_COLUMNS
+
+
 """ 
 from sqlalchemy import select
 import sys
