@@ -105,6 +105,9 @@
         <tr>
             {%for header in  results.result.headers%}
                 <th class="table-header"> | {{header}} | </th>
+                {% if header  == 'IDX' %}
+                <th class="table-header"> | Checked | </th>
+                {%endif%}
             {% endfor %} 
         </tr>
         
@@ -119,6 +122,7 @@
                         {%for header in  results.result.headers%}
                             {% if header  == 'IDX' %}
                                 <td class="{{class_td}}" >{{counter + 1}}</td>
+                                <td class="{{class_td}}" ><input type="checkbox" name="{{results.result.content[header][counter]}}"></td>
                             {% else %}  
                                 <td class="{{class_td}}" >{{results.result.content[header][counter]}}</td>
                             {%endif%}

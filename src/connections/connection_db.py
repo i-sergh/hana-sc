@@ -94,7 +94,12 @@ class AsyncPostgesConnection():
                               literal(datetime.now()),
                               literal(datetime.now())).where(UseProject.prjct_name)
 
-
+#       ##  ##  ####      ##  ##  ####  
+#      ##  ##  ## ##     ### ##  ## ##  
+#     ######  ##  ##    ######  ##  ##  
+#    ##  ##  #######   ## ###  #######  
+#   ##  ##  ##    ##  ##  ##  ##    ##  
+  
 class HanaConnection():
     
     # universal constants
@@ -209,6 +214,28 @@ class HanaConnection():
                 if '_sa_instance_state' in result:
                     result.pop('_sa_instance_state')
             return result_list
+
+
+#   #   ##
+#  ##  #
+#   #  #
+#   #  #
+#  ###  ##
+class OdinAssConnection():
+    HOST = ""
+    PORT = ""
+    USER = ""
+    PASS = ""
+    
+    API_MAPPING ={}
+
+    async def check_connection(self):
+        pass
+
+    #def __str__(self):
+    #    return 
+    
+
 
 CONNECTION_TYPES = {"HANA": HanaConnection, "PG_ASYNC": AsyncPostgesConnection}
 

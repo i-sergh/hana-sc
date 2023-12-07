@@ -12,8 +12,8 @@
     function submitForm(event){
         // получать информацию о каждой форме через эвент
         var data = new FormData(event.target);
-        data.append("prjct_name", "{{data.prjct_name}}")
-        
+        data.append("prjct_name", "{{data.prjct_name}}");
+
         data_dict = {};
         for(let [name, value] of data) {
             data_dict[name] = value;    
@@ -287,7 +287,12 @@
        
             <div class="form_content">
                 <div class="input_form">
-                    <input type="text" placeholder="driver" name="driver" >
+                    <select name="driver" id="lang" required>
+                        <option disabled selected value> -- select an option -- </option>
+                        <option value="HANA">HANA</option>
+                        <option value="API">API</option>
+                    </select>
+                    <!-- <input type="text" placeholder="driver" name="driver" > -->
                 </div>
                 <div class="input_form">
                     <input type="checkbox" aria-label="Target base (otherwise sorce base)" name="is_target" >

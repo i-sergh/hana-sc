@@ -62,13 +62,13 @@ def to_a_new_project(request:Request, prjct_name:str):
 
 @router.post('/new-connection')
 def test(request:Request, prjct_name:Annotated[str, Form()], name:Annotated[str, Form()],
-         driver:Annotated[str, Form()], is_target:Annotated[bool, Form()],
+         driver:Annotated[str, Form()], is_target:Annotated[bool, Form()]=False,
         host:Annotated[str, Form()]="", port:Annotated[str, Form()]="",
         db_name:Annotated[str, Form()]="", db_schema:Annotated[str, Form()]="",
         user:Annotated[str, Form()]="", pwd:Annotated[str, Form()]="",
         api_key:Annotated[str, Form()]=""):
     args = [prjct_name, name, driver, is_target, host, port, db_name, db_schema, user, pwd, api_key]
-
+    print(type(is_target), is_target, 'THIS')
     #TODO: remove indexation of all required fields (maybe remove completely 'requirements' field)
     requirements = ['1' if arg else '0'  for arg in args]
     requirements = ''.join(requirements[2:])
