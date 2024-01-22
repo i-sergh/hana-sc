@@ -229,7 +229,7 @@ async def delete_connection(prjct_name:str, c0nnection_name:str,
 @router.get("/conninfo-by-pname-cname")
 async def get_connection_info_by_prjct_name_cn_name(prjct_name:str, cn_name:str,
                                        session=Depends(get_async_session)):
-
+    print('in query')
     # select * from connections 
     # where connections.prjct_id =  (select projects.id from projects where projects.prjct_name = 'prjct' )
     # and connections.cn_name = 'ConnectHana';
@@ -252,6 +252,7 @@ async def get_connection_info_by_prjct_name_cn_name(prjct_name:str, cn_name:str,
     'cn_apikey': ''}
     """
     result = {}
+    result['DRIVER'] = result_sql['cn_drv'] 
     result['USER'] = result_sql['cn_user']
     result['PASS'] = result_sql['cn_pwd']
     result['HOST'] = result_sql['cn_host']

@@ -11,10 +11,12 @@ from typing import AsyncGenerator
 # TODO: rm when prod
 import sys
 sys.path.append('../')
-print(sys.path)
+
 
 from data_storage.models import UseProject, UseConnect, UseSession
 from storage_pgdb import get_async_session, async_session_maker
+
+from connections.connection_api import APIConnection
 
 import pandas as pd
 
@@ -40,6 +42,8 @@ ALL_CONNECTIONS = {}
 
 
 class AsyncPostgesConnection():
+    CONNECTION_TYPE = "PG_ASYNC"
+
     # contains id of the session; isn't used in connection 
     SESSION_ID = ''
 
@@ -101,7 +105,7 @@ class AsyncPostgesConnection():
 #   ##  ##  ##    ##  ##  ##  ##    ##  
   
 class HanaConnection():
-    
+    CONNECTION_TYPE = "HANA"
     # universal constants
     KEY_COL_FOR_TABLE_SEARCH_IN_TABLES = 'TABLE_NAME'
     KEY_COL_FOR_TABLE_SEARCH_IN_COLUMNS = 'TABLE_NAME'
@@ -162,16 +166,27 @@ class HanaConnection():
         self.create_engine_sessionmaker()
 
     def recreate_db_url(self):
+
+        # this may make a problem with empty fields
         self.DATABASE_URL = f'hana+hdbcli://{self.HANA_USER}:{self.HANA_PASS}@{self.HANA_HOST}:{self.HANA_PORT}'
         return self.DATABASE_URL
 
     def create_engine_sessionmaker(self):
-        self.engine = create_engine(self.DATABASE_URL)
-        self.session_maker = sessionmaker(autoflush=False, bind=self.engine)
+        try: 
+            self.engine = create_engine(self.DATABASE_URL)
+            self.session_maker = sessionmaker(autoflush=False, bind=self.engine)
+        except ValueError:
+            self.session_maker = False
 
+    
     def get_session_generator(self) -> AsyncGenerator[AsyncSession, None]:
-        with self.session_maker() as session:
-            yield session
+
+        if self.session_maker:
+            with self.session_maker() as session:
+                yield session
+        else:
+            return False
+
 
     def get_session(self):
         return self.session_maker()
@@ -180,6 +195,9 @@ class HanaConnection():
         return self.DATABASE_URL    
     
     async def check_connection(self):
+        if not self.session_maker:
+            return False
+
         with self.session_maker() as session:
             try:
                 session.connection()
@@ -215,29 +233,10 @@ class HanaConnection():
                     result.pop('_sa_instance_state')
             return result_list
 
-
-#   #   ##
-#  ##  #
-#   #  #
-#   #  #
-#  ###  ##
-class OdinAssConnection():
-    HOST = ""
-    PORT = ""
-    USER = ""
-    PASS = ""
-    
-    API_MAPPING ={}
-
-    async def check_connection(self):
-        pass
-
-    #def __str__(self):
-    #    return 
     
 
 
-CONNECTION_TYPES = {"HANA": HanaConnection, "PG_ASYNC": AsyncPostgesConnection}
+CONNECTION_TYPES = {"HANA": HanaConnection, "PG_ASYNC": AsyncPostgesConnection, "API": APIConnection}
 
 def get_connection_session(prjct_name, cn_name):
     return ALL_CONNECTIONS[prjct_name, cn_name]
@@ -256,6 +255,11 @@ def delete_connection_session(prjct_name, cn_name):
 def is_connection_session(prjct_name, cn_name) -> bool:
     if (prjct_name, cn_name) in ALL_CONNECTIONS:
         return True
+    return False
+
+def connection_session_type(prjct_name, cn_name) -> str:
+    if (prjct_name, cn_name) in ALL_CONNECTIONS:
+        return ALL_CONNECTIONS[(prjct_name, cn_name)].CONNECTION_TYPE
     return False
 
 def get_all_connection_sessions()-> dict:
@@ -345,53 +349,7 @@ def get_KEY_COL_TABLE_for_columns(prjct_name:str, cn_name:str):
         return False
     return ALL_CONNECTIONS[(prjct_name, cn_name)].KEY_COL_FOR_TABLE_SEARCH_IN_COLUMNS
 
+# API
 
-""" 
-from sqlalchemy import select
-import sys
-sys.path.append('/home/sergh/projects/HANA/Hana_schema/src/')
-from data_storage.models import UseProject, UseConnect
-
-host1 = '10.100.100.11'
-host2 = 'google.com'
-pg1 = AsyncPostgesConnection(PG_HOST=host2, PG_PORT='5435',\
-                             PG_NAME='storage_db', PG_PASS='root', PG_USER='root')
-
-
-
-
-
-
-sql = select(UseProject)
-sql2 = select(UseConnect)
-
-async def main(tst, sql): 
-    
-    async with await tst.get_async_session() as session:
-        #response = (await session.execute(sql)).all()
-        #print([res[0].__dict__ for res in response])
-        print('ok')
-
-#main(pg1, sql)
-asyncio.run(pg1.check_connection()) """
-
-if __name__ == '__main__':
-    #hc1 = HanaConnection(HANA_HOST='sap-s4h-s01.moscow.terralink', HANA_PORT='30015',\
-    #                    HANA_USER='PROSKURIND',  HANA_PASS='Resident4')
-
-    #print(hc1.check_connection())
-
-    #host1 = '10.100.100.11'
-    #host2 = 'google.com'
-    #pg1 = AsyncPostgesConnection(PG_HOST=host1, PG_PORT='5435',\
-    #                            PG_NAME='storage_db', PG_PASS='root', PG_USER='root')
-
-
-    #a = asyncio.run( pg1.check_connection())
-    #print(a)
-
-    kw = {'HANA_HOST':'sap-s4h-s01.moscow.terralink', 'HANA_PORT':'30015',\
-                        'HANA_USER':'PROSKURIND',  'HANA_PASS':'Resident4'}
-    
-    hc1 = HanaConnection(**kw)
-    print(hc1.DATABASE_URL)
+def get_api_base_data(prjct_name:str, cn_name:str):
+    ALL_CONNECTIONS[(prjct_name, cn_name)].get_base_data()

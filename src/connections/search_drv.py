@@ -62,7 +62,6 @@ async def find_table_columns_by_part_name(prjct_name:str, cn_name:str, key_col:s
 async def headers_from_df(df):    
     return df.columns.values.tolist()
 
-from time import sleep
 
 @chek_file_existense
 async def content_from_df(df, headers, key_col, key_word):

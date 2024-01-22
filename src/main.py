@@ -14,8 +14,6 @@ app = FastAPI(
     title="HANA SCHEMA"
 )
 
-# TODO: падает main если нет коннекта к бд
-
 app.include_router(hana_router)
 app.include_router(pages_router)
 app.include_router(search_drv_router)

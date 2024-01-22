@@ -51,7 +51,7 @@ def to_a_new_project(request:Request, prjct_name:str):
     if response['project status'] == 'no project':
         return {"message": "no project"}
     
-    print('THIS IS -> ', response)
+    
     return templates.TemplateResponse('prjct/new_project_form.html', {'request':request,
                                                                         'data':
                                                                             { 'prjct_name': response['projcet name'],
@@ -68,7 +68,7 @@ def test(request:Request, prjct_name:Annotated[str, Form()], name:Annotated[str,
         user:Annotated[str, Form()]="", pwd:Annotated[str, Form()]="",
         api_key:Annotated[str, Form()]=""):
     args = [prjct_name, name, driver, is_target, host, port, db_name, db_schema, user, pwd, api_key]
-    print(type(is_target), is_target, 'THIS')
+
     #TODO: remove indexation of all required fields (maybe remove completely 'requirements' field)
     requirements = ['1' if arg else '0'  for arg in args]
     requirements = ''.join(requirements[2:])
@@ -77,14 +77,14 @@ def test(request:Request, prjct_name:Annotated[str, Form()], name:Annotated[str,
     keys = ['prjct_name','name','requirements', 'driver', 'is_target',  
                         'host', 'port', 'db_name', 'db_schema', 'user', 'pwd', 'api_key']
     kwargs = dict([[key, arg] for key,arg in zip(keys, args)])
-    print(kwargs)
+    
     call_create_connect(request, **kwargs)
     return {'response': '0k'}
 
 ## Utils
 def call_create_project(request:Request, prjct_name:str, prjct_description:str):
     HOST = request.base_url
-    print(HOST)
+    
     url = f'{HOST}data/create-project?prjct_name={prjct_name}&prjct_desc={prjct_description}'
     response = requests.post(url)
     
@@ -104,6 +104,6 @@ def call_get_project_and_connections(request:Request, prjct_name:str):
     url = f'{HOST}data/get-project-and-connections?prjct_name={prjct_name}'
     
     response = requests.get(url)
-    print('THIS IS -> ', response)
+    
     return response
 

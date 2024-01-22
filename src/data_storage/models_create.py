@@ -1,5 +1,7 @@
+
+
 from sqlalchemy import Column, ForeignKey, Integer, String, TIMESTAMP, Boolean
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, mapped_column
 try:
     from storage_pgdb import Base as StoragePgBase
 except:
@@ -8,6 +10,8 @@ except:
     sys.path.append('../')
     from storage_pgdb import Base as StoragePgBase
 
+
+# TODO: rewrite to the maped_column
 
 class ProjectCreate(StoragePgBase):
     __tablename__ = "projects"
@@ -43,6 +47,53 @@ class SessionCreate(StoragePgBase):
     created_at = Column(TIMESTAMP, nullable=False)
     last_used_at = Column(TIMESTAMP, nullable=False)
     prjcts = relationship(ProjectCreate)
-    prjcts = relationship(ConnectionCreate)
+    cncts = relationship(ConnectionCreate)
     
+
+class APIBaseCreate(StoragePgBase):
+    __tablename__ = "api"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    cn_id = Column(Integer, ForeignKey('connections.id', ondelete="CASCADE"))
+    user = Column(String)
+    pwd = Column(String)
+    host = Column(String)
+    port = Column(String)
+    protocol = Column(String)
+    root_path = Column(String, comment="Must content path without host")
+    cncts = relationship(ConnectionCreate)
+
+class APIMapCreate(StoragePgBase):
+    __tablename__ = "api_map"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    apt_id = Column(Integer, ForeignKey('api.id', ondelete='CASCADE'))
+    route = Column(String)
+    method = Column(String)
+
+    apis = relationship(APIBaseCreate)
+    
+class APIVarsHeaderCreate(StoragePgBase):
+    __tablename__ = "api_map_header"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    api_map_id = Column(Integer, ForeignKey("api_map.id", ondelete="CASCADE")) 
+    var_type = Column(String) # might be lookup table
+    var_val = Column(String)
+
+    api_maps = relationship(APIMapCreate)
+
+class APIVarsBodyCreate(StoragePgBase):
+    __tablename__ = "api_map_body"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    api_map_id = Column(Integer, ForeignKey("api_map.id", ondelete="CASCADE")) 
+    var_type = Column(String) # might be lookup table
+    var_val = Column(String)
+
+    api_maps = relationship(APIMapCreate)
+
+
+class APIVarsBodyCreate(StoragePgBase):
+    __tablename__ = "APIS"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+
+
+
 

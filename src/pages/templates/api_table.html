@@ -1,0 +1,333 @@
+{% extends "search.html"%}
+
+{% block head_in_search %}
+<link rel="stylesheet" href="{{ url_for('static', path='prjct/api_table_form.css') }}"> 
+<link rel="stylesheet" href="{{ url_for('static', path='prjct/new_project_form.css') }}"> 
+<!-- <link rel="stylesheet" href="{{ url_for('static', path='table.css') }}">
+ -->
+ 
+<script>
+    window.onload =  function(){ 
+        resizables = document.querySelectorAll(".to-onload");
+
+        for (obj_id in resizables) {
+            
+            try{
+                size_changing(resizables[obj_id]);
+            }
+            catch{}
+        }
+
+    }
+
+    function input_into_port_field(){
+        if (this.value.length == 0){
+            document.querySelector(".no-port").style.width = "0%";
+        }
+        else{
+            document.querySelector(".no-port").style.width = "auto";
+        }
+    }
+
+    function size_changing(it, empty_coef, filled_coef){
+        
+        if(empty_coef==null){empty_coef = 0.565;}
+        if(filled_coef==null){filled_coef = 0.6;}
+
+        if(it.value.length > 0){
+            it.style.width = ((it.value.length + 1)*filled_coef) + 'rem';
+        }
+        else{
+            it.style.width = ((it.placeholder.length + 1)*empty_coef) + 'rem';
+        }
+    }
+
+    function checkConnection(btn){
+        // используется в меню  
+        const prjct_name = "{{prjct_name}}";
+        const connection_name = "{{cn_name}}";
+        const btn_content = btn.querySelectorAll(".menu_button_text")[0];
+        const type_drv = "HANA";
+        const url=`/session/new-und-check?prjct_name=${prjct_name}&cn_name=${connection_name}&cn_type=${type_drv}`;
+        btn_content.className = "menu_button_text check_connection connection_check_content_processing";
+        btn_content.querySelectorAll(".connection_check_inner")[0].innerHTML = "*";
+        btn_content.querySelectorAll(".connection_check_inner")[0].className = "connection_check_inner connection_check_content_processing_inner";
+               
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        }).then(response=>{ 
+            response.json().then(
+                result=> {
+                    console.log(result);
+                    if(result["result"])
+                        {
+                            btn_content.className = "menu_button_text check_connection connection_check_content_success";
+                            btn_content.querySelectorAll(".connection_check_inner")[0].innerHTML = "✔";
+                            btn_content.querySelectorAll(".connection_check_inner")[0].className = "connection_check_inner";
+                        } 
+                    else{
+                            btn_content.className = "menu_button_text check_connection connection_check_content_fail";
+                            btn_content.querySelectorAll(".connection_check_inner")[0].innerHTML = "✖";
+                            btn_content.querySelectorAll(".connection_check_inner")[0].className = "connection_check_inner";
+                    }
+                    
+            }) }); 
+    }
+    
+
+    function addNewRowVarsForm(it){
+        container = it.parentNode.parentNode.parentNode;
+        template = document.getElementById("api_var_row");
+        container.appendChild(template.content.cloneNode(true));
+    }
+</script>
+{% endblock %}
+
+
+{% block content %}
+<h1>{{prjct_name}} / {{cn_name}}
+</h1>
+<h2>
+    status:
+    
+    has
+    {%if not is_session %} 
+     no
+    {%endif%}
+    session ::
+    
+    has 
+    {%if not has_schema%}
+    no 
+    {%endif%}
+     schema
+</h2>
+
+<div class="menu_block">
+    <div class="menu_button_block">
+        
+        <div class="menu_button back_menu" onclick="document.getElementById('backForm').submit()">
+                <span class="menu_button_text back_symbol"><</span>
+                <div class="menu_botton_subtext_wrapper">
+                    <span class="button_subtext">Previous step</span>
+                </div>
+            </div>
+        
+    </div>
+    <div class="menu_button_block">
+        
+        <div class="menu_button add_connection_menu" onclick="checkConnection(this)">
+                <span class="menu_button_text check_connection connection_check_content_undef">
+                    [<span class="connection_check_inner">?</span>]
+                </span>
+                <div class="add_connection menu_botton_subtext_wrapper">
+                    <span class="button_subtext">Check connection</span>
+                </div>
+            </div>
+    </div>
+
+
+        <!-- change prefix path -->
+        <form class="ConnectForm" action="" onsubmit="submitForm(event)" >
+            <div class="form_wrapper_header form_wrapper_connection_empty">
+                <div class="form_header_content">
+
+                    
+
+                    <div class="input_form_on_content">
+                        <select class="input_selector_api_protocol"  name="protocol" id="ptcl" required>
+                            <option disabled selected value> -- select protocol -- </option>
+                            <option value="HTTP">http://</option>
+                            <option value="PTTPS">https://</option>
+                        </select>
+                    </div>
+            
+                    <div class="input_form_on_content" >
+                        <input class="to-onload" type="text" placeholder="host" name="host" value="{{HOST}}" required
+                         oninput="size_changing(this)">
+                    </div>
+                    <div class="input_form_on_content" >
+                        <input class="to-onload" type="text" placeholder="port" name="port" value="{{PORT}}" required
+                        oninput='size_changing(this); input_into_port_field()'>
+                    </div>
+                    <div class=" no-port input_form_on_content" >
+                         :/ 
+                    </div>
+                    <div class="input_form_on_content" >
+                        <input class="to-onload" type="text" placeholder="shortcut" name="shortcut" value="{{SHORTCUT}}"
+                        oninput="size_changing(this)">
+            
+                    </div>
+                    
+                </div>
+            </div>
+        
+        
+        </form>
+    
+    <!-- end prefix change -->
+</div>
+<!-- end of menu bar-->
+
+
+
+
+
+
+<!-- create routes -->
+
+
+<div class="form_wrapper" tabindex="-1">
+    <form class="ConnectForm" action="" onsubmit="" >
+        <div class="form_wrapper_header form_wrapper_connection_empty">
+            <div class="form_header_content">
+
+                <div class="buttton__connection_form" 
+                style="margin-right: 2rem;"
+                onclick="this.parentNode.parentNode.parentNode.parentNode.remove()">
+                    x
+                </div>
+
+                <div class="input_form_on_content" >
+                    {{results.PROTOCOL}}
+                    <!-- <input type="text" placeholder="driver" name="driver" > -->
+                </div>
+                <div class="input_form_on_content" >
+                    {{HOST}}
+                </div>
+                <div class="input_form_on_content" >
+                    {{SHORTCUT}}
+                </div>
+                <div class="input_form_on_content" >
+                    <input class="to-onload" type="text" placeholder="your/api/path" name="api_path" 
+                    oninput="size_changing(this)">
+                </div>
+                
+                
+            </div>
+        </div>
+        
+        <div class="form_content">
+            
+            <div class="api_head_body_tables_wrapper">
+                <div class="api_head_body_tables_inner_wrapper api_head_body_tables_inner_wrapper_left">
+                    <span>HEAD</span> 
+                    <table>
+                        <tr>
+                            <th>&nbsp;&nbsp;&nbsp;</th>
+                            <th>VAR NAME</th>
+                            <th>DTYPE</th>
+                            <th>DEFAULT VAL</th>
+                        </tr>
+                        <!-- form -->
+                        <tr class="deactivated">
+                            <td>
+                                <div class="buttton__connection_form" 
+                                        style="margin-right: 2rem;"
+                                        onclick="addNewRowVarsForm(this)">
+
+                                        <!-- onclick="this.parentNode.parentNode.parentNode.parentNode.remove()"> -->
+                                        +
+                                </div>
+                            </td>
+                            <td>
+                                <input class="to-onload" type="text" filled="0.45" empty="0.5" placeholder="var name" name="VAR" 
+                                oninput="size_changing(this, 0.45, 0.5)">
+                            </td>
+                            <td>
+                                <input class="to-onload" type="text" placeholder="your/api/path" name="VAR" 
+                                oninput="size_changing(this, 0.45, 0.5)">
+                            </td>
+                            <td>
+                                <input class="to-onload" type="text" placeholder="your/api/path" name="VAR" 
+                                oninput="size_changing(this, 0.45, 0.5)">
+                            </td>
+                            
+                        </tr>
+                        <!-- /form -->
+                    </table>
+                </div>
+                
+                <div class="division"> </div>
+                
+                
+
+                <div class="api_head_body_tables_inner_wrapper api_head_body_tables_inner_wrapper_right">
+                    <span>BODY</span>
+                    <table>
+                        <tr>
+                            <th>&nbsp;&nbsp;&nbsp;</th>
+                            <th>VAR NAME</th>
+                            <th>DTYPE</th>
+                            <th>DEFAULT VAL</th>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="buttton__connection_form" 
+                                        style="margin-right: 2rem;"
+                                        onclick="this.parentNode.parentNode.parentNode.parentNode.remove()">
+                                        +
+                                </div>
+                            </td>
+                            <td>
+                                <input class="to-onload" type="text" filled="0.45" empty="0.5" placeholder="var name" name="VAR" 
+                                oninput="size_changing(this, 0.45, 0.5)">
+                            </td>
+                            <td>
+                                <input class="to-onload" type="text" placeholder="your/api/path" name="VAR" 
+                                oninput="size_changing(this, 0.45, 0.5)">
+                            </td>
+                            <td>
+                                <input class="to-onload" type="text" placeholder="your/api/path" name="VAR" 
+                                oninput="size_changing(this, 0.45, 0.5)">
+                            </td>
+                            
+                        </tr>
+                    </table> 
+                </div>
+            </div>       
+            
+            <!-- submit -->
+            <div class="input_form input_form_submit" >
+                <input type="submit" value="Submit">
+            </div>
+        </div>
+    </form>
+</div>
+
+
+<!-- TEMPLATES -->
+<template id="api_var_row">
+    <tr class="deactivated">
+        <td>
+            <div class="buttton__connection_form" 
+                    style="margin-right: 2rem;"
+                    onclick="this.parentNode.parentNode.parentNode.parentNode.remove()">
+                    +
+            </div>
+        </td>
+        <td>
+            <input class="to-onload" type="text" filled="0.45" empty="0.5" placeholder="var name" name="VAR" 
+            oninput="size_changing(this, 0.45, 0.5)">
+        </td>
+        <td>
+            <input class="to-onload" type="text" placeholder="your/api/path" name="VAR" 
+            oninput="size_changing(this, 0.45, 0.5)">
+        </td>
+        <td>
+            <input class="to-onload" type="text" placeholder="your/api/path" name="VAR" 
+            oninput="size_changing(this, 0.45, 0.5)">
+        </td>
+        
+    </tr>
+</template>
+
+
+
+<form id='backForm' action='/pages/prjct/open-project?prjct_name={{prjct_name}}' method='post'>
+</form>
+{% endblock %}

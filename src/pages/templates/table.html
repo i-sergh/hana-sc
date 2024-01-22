@@ -9,6 +9,8 @@
         const prjct_name = "{{prjct_name}}";
         const connection_name = "{{cn_name}}";
         const btn_content = btn.querySelectorAll(".menu_button_text")[0];
+        
+        // убрать, и заменить на драйвер из формы
         const type_drv = "HANA";
         const url=`/session/new-und-check?prjct_name=${prjct_name}&cn_name=${connection_name}&cn_type=${type_drv}`;
         btn_content.className = "menu_button_text check_connection connection_check_content_processing";
@@ -39,7 +41,6 @@
                     
             }) }); 
     }
-    
 </script>
 {% endblock %}
 
@@ -58,7 +59,7 @@
     
     has 
     {%if not has_schema%}
-    no 
+    no
     {%endif%}
      schema
 </h2>
@@ -114,7 +115,7 @@
         {%for counter in range(qty_val) %}
             {% if counter % 2 == 0 %}
                 {%set class_td =  "even tdleft" %}
-            {% else %}  
+            {% else %}
                 {%set class_td =  "odd tdleft" %}
             {%endif%} 
                

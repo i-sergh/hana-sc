@@ -3,7 +3,7 @@ from fastapi.templating import Jinja2Templates
 
 #from hana.router import get_table_structure
 
-from connections.connection_db import is_connection_session, is_schema_saved
+from connections.connection import is_connection_session, is_schema_saved, connection_session_type
 from connections.router import get_table_structure
 
 router = APIRouter(
@@ -28,16 +28,37 @@ def get_start_page(request: Request):
 def show_table_struct_form(request: Request, prjct_name:str, cn_name:str): #
     """Возвращает страницку для получения структуры таблицы"""
     is_session = is_connection_session(cn_name=cn_name, prjct_name=prjct_name)
-    has_schema = is_schema_saved(prjct_name=prjct_name, cn_name=cn_name)
+    connection_type =  connection_session_type(cn_name=cn_name, prjct_name=prjct_name)
+
+    # rm
+    print('MY_MESSAGE: pages.router post:/struct/{prjct_name}/{cn_name}/', connection_type)
+
+    has_schema = is_schema_saved(prjct_name=prjct_name, cn_name=cn_name) # TODO: to three states: has/ho schema/schema loaded 
     
-    return templates.TemplateResponse('table.html', 
+    if connection_type in ("HANA", "PG_ASYNC"):
+        return templates.TemplateResponse('table.html', 
                                         {'request': request,
                                          'is_session': is_session,
                                          'has_schema': has_schema,
                                          'prjct_name': prjct_name,
                                          'cn_name': cn_name,
                                           'results': None})
-
+    else: # if API
+        DUMMY = {
+            'PROTOCOL': 'https://',
+            'PATH': 'data/path'
+            }
+        return templates.TemplateResponse('api_table.html', 
+                                        {'request': request,
+                                         'is_session': is_session,
+                                         'has_schema': has_schema,
+                                         'prjct_name': prjct_name,
+                                         'cn_name': cn_name,
+                                         
+                                         'HOST': "host.dummy/",
+                                         'PORT': '8888', # do not forget to append ":/"
+                                         'SHORTCUT': 'to/the/cut/',
+                                         'results': DUMMY})
 
      
 @router.post('/struct/{prjct_name}/{cn_name}/{table_name}/')
