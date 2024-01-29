@@ -36,6 +36,7 @@ def show_table_struct_form(request: Request, prjct_name:str, cn_name:str): #
     has_schema = is_schema_saved(prjct_name=prjct_name, cn_name=cn_name) # TODO: to three states: has/ho schema/schema loaded 
     
     if connection_type in ("HANA", "PG_ASYNC"):
+
         return templates.TemplateResponse('table.html', 
                                         {'request': request,
                                          'is_session': is_session,

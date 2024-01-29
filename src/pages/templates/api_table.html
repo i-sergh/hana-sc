@@ -17,7 +17,6 @@
             }
             catch{}
         }
-
     }
 
     function input_into_port_field(){
@@ -80,9 +79,33 @@
     
 
     function addNewRowVarsForm(it){
+        
+        it.classList.add("btn_deny");
+
         container = it.parentNode.parentNode.parentNode;
+        it.parentNode.parentNode.classList.remove('deactivated');
         template = document.getElementById("api_var_row");
         container.appendChild(template.content.cloneNode(true));
+
+        resizables = container.querySelectorAll(".to-onload");
+        for (obj_id in resizables) {
+            
+            try{
+                size_changing(resizables[obj_id]);
+                resizables[obj_id].disabled=false;
+                console.log(resizables[obj_id]);
+                
+            }
+            catch{}
+        }
+
+        template_btn = document.getElementById("btn_accept");
+        it.parentNode.appendChild(template_btn.content.cloneNode(true));
+        it.setAttribute( "onClick", "denyRowWarsForm(this)" );
+    }
+
+    function denyRowWarsForm(it){
+        it.parentNode.parentNode.remove();    
     }
 </script>
 {% endblock %}
@@ -116,7 +139,6 @@
                     <span class="button_subtext">Previous step</span>
                 </div>
             </div>
-        
     </div>
     <div class="menu_button_block">
         
@@ -186,7 +208,7 @@
         <div class="form_wrapper_header form_wrapper_connection_empty">
             <div class="form_header_content">
 
-                <div class="buttton__connection_form" 
+                <div class="api_buttton__connection_form" 
                 style="margin-right: 2rem;"
                 onclick="this.parentNode.parentNode.parentNode.parentNode.remove()">
                     x
@@ -218,16 +240,15 @@
                     <span>HEAD</span> 
                     <table>
                         <tr>
-                            <th>&nbsp;&nbsp;&nbsp;</th>
+                            <th></th>
                             <th>VAR NAME</th>
                             <th>DTYPE</th>
                             <th>DEFAULT VAL</th>
                         </tr>
                         <!-- form -->
                         <tr class="deactivated">
-                            <td>
-                                <div class="buttton__connection_form" 
-                                        style="margin-right: 2rem;"
+                            <td class="td_with_btn">
+                                <div class="api_buttton__connection_form" 
                                         onclick="addNewRowVarsForm(this)">
 
                                         <!-- onclick="this.parentNode.parentNode.parentNode.parentNode.remove()"> -->
@@ -236,15 +257,15 @@
                             </td>
                             <td>
                                 <input class="to-onload" type="text" filled="0.45" empty="0.5" placeholder="var name" name="VAR" 
-                                oninput="size_changing(this, 0.45, 0.5)">
+                                oninput="size_changing(this, 0.45, 0.5)" disabled>
                             </td>
                             <td>
                                 <input class="to-onload" type="text" placeholder="your/api/path" name="VAR" 
-                                oninput="size_changing(this, 0.45, 0.5)">
+                                oninput="size_changing(this, 0.45, 0.5)" disabled>
                             </td>
                             <td>
                                 <input class="to-onload" type="text" placeholder="your/api/path" name="VAR" 
-                                oninput="size_changing(this, 0.45, 0.5)">
+                                oninput="size_changing(this, 0.45, 0.5)" disabled>
                             </td>
                             
                         </tr>
@@ -260,33 +281,36 @@
                     <span>BODY</span>
                     <table>
                         <tr>
-                            <th>&nbsp;&nbsp;&nbsp;</th>
+                            <th></th>
                             <th>VAR NAME</th>
                             <th>DTYPE</th>
                             <th>DEFAULT VAL</th>
                         </tr>
-                        <tr>
-                            <td>
-                                <div class="buttton__connection_form" 
-                                        style="margin-right: 2rem;"
-                                        onclick="this.parentNode.parentNode.parentNode.parentNode.remove()">
+                        <!-- form -->
+                        <tr class="deactivated">
+                            <td class="td_with_btn">
+                                <div class="api_buttton__connection_form" 
+                                        onclick="addNewRowVarsForm(this)">
+
+                                        <!-- onclick="this.parentNode.parentNode.parentNode.parentNode.remove()"> -->
                                         +
                                 </div>
                             </td>
                             <td>
                                 <input class="to-onload" type="text" filled="0.45" empty="0.5" placeholder="var name" name="VAR" 
-                                oninput="size_changing(this, 0.45, 0.5)">
+                                oninput="size_changing(this, 0.45, 0.5)" disabled>
                             </td>
                             <td>
                                 <input class="to-onload" type="text" placeholder="your/api/path" name="VAR" 
-                                oninput="size_changing(this, 0.45, 0.5)">
+                                oninput="size_changing(this, 0.45, 0.5)" disabled>
                             </td>
                             <td>
                                 <input class="to-onload" type="text" placeholder="your/api/path" name="VAR" 
-                                oninput="size_changing(this, 0.45, 0.5)">
+                                oninput="size_changing(this, 0.45, 0.5)" disabled>
                             </td>
                             
                         </tr>
+                        <!-- /form -->
                     </table> 
                 </div>
             </div>       
@@ -303,29 +327,34 @@
 <!-- TEMPLATES -->
 <template id="api_var_row">
     <tr class="deactivated">
-        <td>
-            <div class="buttton__connection_form" 
-                    style="margin-right: 2rem;"
-                    onclick="this.parentNode.parentNode.parentNode.parentNode.remove()">
+        <td class="td_with_btn">
+            <div class="api_buttton__connection_form" 
+                    onclick="addNewRowVarsForm(this)">
                     +
             </div>
         </td>
         <td>
-            <input class="to-onload" type="text" filled="0.45" empty="0.5" placeholder="var name" name="VAR" 
-            oninput="size_changing(this, 0.45, 0.5)">
+            <input class="to-onload" type="text" filled="0.45" empty="0.5" placeholder="var name" name="HEAD_VAR_NAME" 
+            oninput="size_changing(this, 0.45, 0.5)" disabled>
         </td>
         <td>
             <input class="to-onload" type="text" placeholder="your/api/path" name="VAR" 
-            oninput="size_changing(this, 0.45, 0.5)">
+            oninput="size_changing(this, 0.45, 0.5)" disabled>
         </td>
         <td>
             <input class="to-onload" type="text" placeholder="your/api/path" name="VAR" 
-            oninput="size_changing(this, 0.45, 0.5)">
+            oninput="size_changing(this, 0.45, 0.5)" disabled>
         </td>
         
     </tr>
 </template>
 
+<template id="btn_accept">
+    <div class="api_buttton__connection_form" 
+        onclick=""> <!-- hete must be DA MAGIC function -->
+        ✔
+     </div>
+</template>
 
 
 <form id='backForm' action='/pages/prjct/open-project?prjct_name={{prjct_name}}' method='post'>

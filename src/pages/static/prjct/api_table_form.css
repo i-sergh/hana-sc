@@ -19,12 +19,17 @@
     padding-top: 10px;
     padding-bottom: 10px;
     line-height: 1.9rem;
-    margin: 0px; 
-    background-color: #e4cbfd;  
+    margin: 0px;
+    background-color: #e4cbfd;
 }
 
 .deactivated td input{
     outline: 3px solid #877995;
+    
+}
+
+.td_with_btn{
+    display: flex;
 }
 
 .input_form_on_content input {
@@ -65,11 +70,14 @@
     align-items: flex-start;   
 }
 
-.api_head_body_tables_inner_wrapper_right span{
+ .api_head_body_tables_inner_wrapper_right span{
     margin-left: 28% ;
 }
-
-
+ 
+.btn_deny{
+    transition: 0.5s;
+    transform: rotate(45deg);
+}
 
 table{
     position: relative;
@@ -77,3 +85,31 @@ table{
   /*   z-index: -1; replace to another index */
   }
 
+/* 
+  table, th, td {
+    border: 1px solid black;
+  } */
+
+  .api_buttton__connection_form{
+    display: flex;
+    background-color: transparent;
+    color:#f6584a;
+    width: 30px;
+    height: 30px;
+    font-size: 18pt;
+    font-weight: bolder;
+    border-radius: 50%;
+    box-shadow: #f66f4a 2px 2px 2px,  #5e2718 2px 2px 4px;
+    justify-content: center;
+    align-items: center;
+    user-select: none;
+    white-space: nowrap;
+    transition: 0.3s;
+    
+}
+
+.api_buttton__connection_form:active{
+    box-shadow: none;
+    color:#ed3120;
+    transform: scaleX(95%) scaleY(95%);
+}
