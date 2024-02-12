@@ -1,7 +1,10 @@
 import requests
 import json
 
-from sqlalchemy import select, and_
+from sqlalchemy import select, and_, insert, update
+from sys import stderr
+
+from typing import List, Dict, Any
 
 try: 
     from data_storage.models import UseAPIBase, UseProject, UseConnect
@@ -29,15 +32,37 @@ class APIConnection():
     # TODO: query mapping to class + responses
 
     # might be helpful to contain here quantity of paths
-    def __init__(self,HOST:str,  USER:str="", PASS:str="",  PORT:str = "",  *args, **kwargs):
+
+    @staticmethod
+    def _variables_str_checker(vars):
+        def decorator(func):
+            def inner(self, *args, **qwargs):
+                nonlocal vars
+                if type(vars) is str:
+                    vars = [vars,]
+                for var in vars:
+                    if not(hasattr(self, var)):
+                        print(f"NÖ!, your APIConnection.{var} does not exist")
+                        return
+                    if not(type(self.__getattribute__(var)) is str):
+                        print(f"NÖ! your APIConnection.{var}={self.__getattribute__(var)} invalid. {type(self.__getattribute__(var))} is not string")
+                        return 
+                    if not(len(self.__getattribute__(var)) > 0):
+                        print(f"NÖ! your APIConnection.{var} is empty!")
+                        return
+                func(self, *args, **qwargs)
+            return inner
+        return decorator
+    
+    def __init__(self, HOST:str="",  USER:str="", PASS:str="",  PORT:str = "",  *args, **kwargs):
         self.USER = USER
         self.PASS = PASS
 
-        if HOST[-1] == '/':
+        if HOST !="" and HOST[-1] == '/':
             HOST = HOST[0:len(HOST)-1]
 
         self.HOST = HOST
-        self.PORT = ':' + PORT +'/' if PORT else '/'
+        self.PORT = str(PORT) if type(PORT) is int else PORT 
         self.PROTOCOL = ""
 
         self.ROOT = ""
@@ -57,30 +82,43 @@ class APIConnection():
         self._recreate_root_url()
 
     def _recreate_root_url(self):
-        self.ROOT = f'{self.HOST}{self.PORT}{self.ROOT_PATH}'
+        slash_or_port = ':' + self.PORT +'/' if self.PORT else '/'
+
+        self.ROOT = f'{self.PROTOCOL}{self.HOST}{slash_or_port}{self.ROOT_PATH}'
         return self.ROOT
     
-    def change_root_path(self, root_path):
-        self.ROOT_PATH = root_path
+    def set_shortcut(self, shortcut):
+        self.ROOT_PATH = shortcut
         self._recreate_root_url()
 
-    def change_host(self, host):
+    #@_variables_str_checker('HOST')
+    def set_host(self, host):
         self.HOST = host
         self._recreate_root_url()
 
-    def change_port(self, port):
+    def set_port(self, port):
         self.PORT = port
         self._recreate_root_url()
 
-    def change_user(self, user):
+    def set_user(self, user):
         self.USER = user
-        
-    def change_pass(self, pwd):
+
+    def set_pass(self, pwd):
         self.PASS = pwd
+    
+    def set_protocol(self, protocol):
+        self.PROTOCOL = protocol
+        self._recreate_root_url()
+
+    def set_cn_name(self, cn_name):
+        self.CN_NAME = cn_name
+
+    def set_prjct_name(self, prjct_name):
+        self.PRJCT_NAME = prjct_name
 
     def __str__ (self):
         return self.ROOT
-
+    
     def add_request_path(self, request_path:str, method:str="GET", headers_params:dict={}, body_variables:dict={}):
         """
             request_path - full path from ROOT 
@@ -105,6 +143,7 @@ class APIConnection():
             #session.auth = (WebService, WebService1)
         return session
 
+    
     async def exequte_query(self, query_path, method="GET"):
         # TODO: think about id/uid access
         # TODO: return not None? 
@@ -124,7 +163,6 @@ class APIConnection():
                                            verify=False)
                     print(response)
                     print(response.url)
-                    
                     print('\n\n')
 
                 case "POST":
@@ -155,22 +193,26 @@ class APIConnection():
                 case _:
                     print(f"Unpredictable method - {method} in API {self.__str__()}")
                     return None
+    
     def get_base_data(self):
         data = {'HOST': self.HOST,
                 'PORT': self.PORT,
                 'ROOT': self.ROOT_PATH}
-        return data                    
+        return data
 
-    async def load_prjct_and_cn_ids(self,prjct_name="", cn_name=""):
+    async def load_prjct_and_cn_ids(self):
+        
+        if self.CN_NAME=="" or self.PRJCT_NAME=="":
+            raise ValueError("No CN_NAME or PRJCT_NAME")
+        
         async with async_session_maker() as session:
             sql = select(UseProject.id, UseConnect.id).join(UseConnect).\
-                where(and_(UseProject.prjct_name==prjct_name, UseConnect.cn_name==cn_name))
+                where(and_(UseProject.prjct_name==self.PRJCT_NAME, UseConnect.cn_name==self.CN_NAME))
+            
             result_raw = (await session.execute(sql)).all()
             self.PRJCT_ID = result_raw[0][0]
             self.CN_ID = result_raw[0][1]
-            self.PRJCT_NAME = prjct_name
-            self.CN_NAME = cn_name
-
+            
     async def load_base_data_from_db (self):
         async with async_session_maker() as session:
             sql = select(UseAPIBase.id,
@@ -184,14 +226,48 @@ class APIConnection():
             
             result_raw = (await session.execute(sql)).all()
             
-            self.API_ID = result_raw[0][0]
-            self.API_USER_NAME = result_raw[0][1]
-            self.PASS = result_raw[0][2]
-            self.HOST = result_raw[0][3]
-            self.PORT = result_raw[0][4]
-            self.PROTOCOL = result_raw[0][5]
-            self.ROOT_PATH = result_raw[0][6]
-    # TODO: To get results about api routes should use db!!!!   DONE(?)         
+            self.API_ID = result_raw[0][0] 
+            
+            
+            self.API_USER_NAME = result_raw[0][1] if result_raw[0][1] else ""
+            self.PASS = result_raw[0][2]  if result_raw[0][2] else ""
+            self.HOST = result_raw[0][3]  if result_raw[0][3] else ""
+            self.PORT = result_raw[0][4]  if result_raw[0][4] else ""
+            self.PROTOCOL = result_raw[0][5]  if result_raw[0][5] else ""
+            self.ROOT_PATH = result_raw[0][6]  if result_raw[0][6] else ""
+            self._recreate_root_url()
+    #TODO: To get results about api routes should use db!!!!    DONE(?)         
+
+    async def init_new_entry_in_db (self):
+        if self.CN_ID == "":
+            raise ValueError("CN_ID is None. No CN_NAME or PRJCT_NAME")
+
+        async with async_session_maker() as session:
+            sql =  insert(UseAPIBase).values(
+                         cn_id = self.CN_ID,
+                         user = self.USER,
+                         pwd = self.PASS,
+                         host = self.HOST,
+                         port = self.PORT)
+            
+            await session.execute(sql)
+            await session.commit()
+
+    async def update_entry_in_db(self):
+        if self.CN_ID == "":
+            raise ValueError("CN_ID is None. No CN_NAME or PRJCT_NAME")
+
+        async with async_session_maker() as session:
+            sql =  update(UseAPIBase).values(
+                         user = self.USER,
+                         pwd = self.PASS,
+                         host = self.HOST,
+                         port = self.PORT,
+                         protocol = self.PROTOCOL,
+                         root_path= self.ROOT_PATH).where(UseAPIBase.cn_id == self.CN_ID) 
+            
+            await session.execute(sql)
+            await session.commit()
 
     async def check_connection(self):
         #TODO
@@ -201,13 +277,15 @@ class APIConnection():
 if __name__ == "__main__":
     import asyncio
 
-    api = APIConnection(HOST='https://10.100.103.59/', USER="WebService", PASS="WebService1")
-    async def sequentially_calling():
-        await api.load_prjct_and_cn_ids('p2', 'cn')
-        await api.load_base_data_from_db()
+    api = APIConnection(HOST='10.100.103.59', USER="WebService", PASS="WebService1", PORT="888")
     
+    api.set_protocol("https://")
+    async def _calling():
+        await api.init_new_entry_in_db()
+        #await api.load_base_data_from_db()
+        print(api)
     asyncio.run(
-        sequentially_calling()
+        _calling()
     )
     
     #from time import sleep

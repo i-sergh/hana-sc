@@ -5,7 +5,7 @@ from fastapi.templating import Jinja2Templates
 
 from connections.connection import is_connection_session, is_schema_saved, connection_session_type
 from connections.router import get_table_structure
-
+from connections.connection_api import APIConnection
 router = APIRouter(
     prefix='/pages',
     tags=['pages']
@@ -25,13 +25,13 @@ def get_start_page(request: Request):
 
 #@router.get('/struct/{prjct_name}/{cn_name}/')
 @router.post('/struct/{prjct_name}/{cn_name}/')
-def show_table_struct_form(request: Request, prjct_name:str, cn_name:str): #
+async def show_table_struct_form(request: Request, prjct_name:str, cn_name:str): #
     """Возвращает страницку для получения структуры таблицы"""
     is_session = is_connection_session(cn_name=cn_name, prjct_name=prjct_name)
-    connection_type =  connection_session_type(cn_name=cn_name, prjct_name=prjct_name)
+    connection_type = connection_session_type(cn_name=cn_name, prjct_name=prjct_name)
 
     # rm
-    print('MY_MESSAGE: pages.router post:/struct/{prjct_name}/{cn_name}/', connection_type)
+    print(' pages.router post:/struct/{prjct_name}/{cn_name}/', connection_type)
 
     has_schema = is_schema_saved(prjct_name=prjct_name, cn_name=cn_name) # TODO: to three states: has/ho schema/schema loaded 
     
@@ -43,12 +43,14 @@ def show_table_struct_form(request: Request, prjct_name:str, cn_name:str): #
                                          'has_schema': has_schema,
                                          'prjct_name': prjct_name,
                                          'cn_name': cn_name,
-                                          'results': None})
+                                         'results': None})
     else: # if API
-        DUMMY = {
-            'PROTOCOL': 'https://',
-            'PATH': 'data/path'
-            }
+        api = APIConnection()
+        api.set_prjct_name(prjct_name=prjct_name)
+        api.set_cn_name(cn_name=cn_name)
+        await api.load_prjct_and_cn_ids()
+        await api.load_base_data_from_db()
+        
         return templates.TemplateResponse('api_table.html', 
                                         {'request': request,
                                          'is_session': is_session,
@@ -56,10 +58,11 @@ def show_table_struct_form(request: Request, prjct_name:str, cn_name:str): #
                                          'prjct_name': prjct_name,
                                          'cn_name': cn_name,
                                          
-                                         'HOST': "host.dummy/",
-                                         'PORT': '8888', # do not forget to append ":/"
-                                         'SHORTCUT': 'to/the/cut/',
-                                         'results': DUMMY})
+                                         'HOST': api.HOST,
+                                         'PORT': api.PORT, 
+                                         'SHORTCUT': api.ROOT_PATH,
+                                         'PROTOCOL': api.PROTOCOL,
+                                         'results': None})
 
      
 @router.post('/struct/{prjct_name}/{cn_name}/{table_name}/')

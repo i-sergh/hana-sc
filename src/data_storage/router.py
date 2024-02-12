@@ -8,7 +8,7 @@ from storage_pgdb import get_async_session, async_session_maker
 
 from datetime import datetime
 from functools import wraps
-
+from connections.connection_api import APIConnection
 
 router = APIRouter(
     prefix='/data',
@@ -131,8 +131,22 @@ async def get_project_and_connections(prjct_name:str, session=Depends(get_async_
     
     data = []
     _ = [res for res in result]
+    
     for raw_data in _:
         r_data_piece = raw_data[2].__dict__
+        if r_data_piece['cn_drv'] == 'API':
+            api = APIConnection()
+            api.set_prjct_name(prjct_name=prjct_name)
+            api.set_cn_name(cn_name=r_data_piece['cn_name'])
+            await api.load_prjct_and_cn_ids()
+            await api.load_base_data_from_db()
+            r_data_piece['cn_host'] = api.HOST
+            r_data_piece['cn_port'] = api.PORT
+            r_data_piece['cn_user'] = api.USER
+            r_data_piece['cn_pwd'] = api.PASS
+
+            print("data_storage/router: " + r_data_piece['cn_name'] + ' is API')
+            print( r_data_piece )
         if '_sa_instance_state' in r_data_piece:
             '''removes technical information'''
             r_data_piece.pop('_sa_instance_state')
@@ -156,8 +170,8 @@ async def get_all_progects_info( session=Depends(get_async_session)):
     return {'result':result_list}
 
 @router.delete('/delete-project')
-async def delete_project_by_name(name:str, session=Depends(get_async_session)):
-    sql = delete(UseProject).where(UseProject.prjct_name==name)
+async def delete_project_by_name(prjct_name:str, session=Depends(get_async_session)):
+    sql = delete(UseProject).where(UseProject.prjct_name==prjct_name)
     await session.execute(sql)
     await session.commit()
     return {'message':'success'}
@@ -179,11 +193,13 @@ async def create_connection(prjct_name:str, name:str, requirements:str,
                       host:str="", port:str="", db_name:str="",
                       db_schema:str="", user:str="", pwd:str="",
                       api_key:str="", session=Depends(get_async_session)):
+    
     """
     connection query to storage_db 
 
     uses subquery with variant parametrs
     """
+    
     subquery = select(UseProject.id, 
                       literal(name),
                       literal(requirements),

@@ -42,10 +42,10 @@
         template = document.getElementById("filledConnectionTemplate");
         newForm = template.content.cloneNode(true);
         newForm.querySelectorAll('.goToConnection')[0].setAttribute('onclick',
-        `document.getElementsByName("goTo${data_dict['name'].trim()}Form")[0].submit()`);
-        newForm.querySelectorAll('.goToConnection form')[0].name = `goTo${data_dict['name'].trim()}Form`;
-        newForm.querySelectorAll('.goToConnection form')[0].action = `/pages/struct/{{data.prjct_name}}/${data_dict['name'].trim()}/`;
-        newForm.querySelectorAll("input[name=name]")[0].value = data_dict['name'].trim();
+        `document.getElementsByName("goTo${data_dict['cn_name'].trim()}Form")[0].submit()`);
+        newForm.querySelectorAll('.goToConnection form')[0].name = `goTo${data_dict['cn_name'].trim()}Form`;
+        newForm.querySelectorAll('.goToConnection form')[0].action = `/pages/struct/{{data.prjct_name}}/${data_dict['cn_name'].trim()}/`;
+        newForm.querySelectorAll("input[name=cn_name]")[0].value = data_dict['cn_name'].trim();
         newForm.querySelectorAll('input[name=host]')[0].value = data_dict['host'].trim();
         newForm.querySelectorAll('input[name=port]')[0].value = data_dict['port'].trim();
         newForm.querySelectorAll('input[name=db_name]')[0].value = data_dict['db_name'].trim();
@@ -187,7 +187,7 @@
                 <div class="form_header_content">
                     
                     <div class="input_form_header input_form" >
-                        <input class="input_header" type="text" value="{{connection['cn_name']}}" name="name" disabled>
+                        <input class="input_header" type="text" value="{{connection['cn_name']}}" name="cn_name" disabled>
                     </div>
 
                     <!-- Btns.... -->
@@ -275,7 +275,7 @@
                 <div class="form_header_content">
                     
                     <div class="input_form_header input_form " >
-                        <input class="input_header" type="text" placeholder="New source connection name" name="name" required>
+                        <input class="input_header" type="text" placeholder="New source connection name" name="cn_name" required>
                     </div>
 
                     <div class="buttton__connection_form" 
@@ -333,7 +333,7 @@
                 <div class="form_header_content">
                     
                     <div class="input_form_header input_form " >
-                        <input class="input_header" type="text"  name="name" disabled>
+                        <input class="input_header" type="text"  name="cn_name" disabled>
                     </div>
 
                     <!-- Btns.... -->

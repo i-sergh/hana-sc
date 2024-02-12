@@ -10,16 +10,20 @@
     window.onload =  function(){ 
         resizables = document.querySelectorAll(".to-onload");
 
-        for (obj_id in resizables) {
-            
-            try{
-                size_changing(resizables[obj_id]);
-            }
-            catch{}
+        for (obj of resizables) {
+            text_size_empty = null;
+            text_size_filled = null;
+
+            if (obj.hasAttribute("text_size_empty"))
+                text_size_empty = obj.getAttribute("text_size_empty");
+            if (obj.hasAttribute("text_size_filled"))
+                text_size_filled = obj.getAttribute("text_size_filled");
+
+            size_changing(obj, text_size_empty, text_size_filled);
         }
     }
 
-    function input_into_port_field(){
+    function inputIntoPortField(){
         if (this.value.length == 0){
             document.querySelector(".no-port").style.width = "0%";
         }
@@ -82,30 +86,97 @@
         
         it.classList.add("btn_deny");
 
-        container = it.parentNode.parentNode.parentNode;
-        it.parentNode.parentNode.classList.remove('deactivated');
+        table_body = it.parentNode.parentNode.parentNode;
+        table__ = it.parentNode.parentNode.parentNode.parentNode;
+        this_row = it.parentNode.parentNode;
+        columns = 3;
+        this_row.classList.remove('deactivated');
         template = document.getElementById("api_var_row");
-        container.appendChild(template.content.cloneNode(true));
+        table_body.appendChild(template.content.cloneNode(true));
 
-        resizables = container.querySelectorAll(".to-onload");
-        for (obj_id in resizables) {
-            
-            try{
-                size_changing(resizables[obj_id]);
-                resizables[obj_id].disabled=false;
-                console.log(resizables[obj_id]);
-                
+        last_row_idx = table_body.rows.length-1;
+        last_row = table_body.rows[last_row_idx];
+
+        enalables = this_row.querySelectorAll(".to-onload");
+        resizables = last_row.querySelectorAll(".to-onload");
+        for (obj of enalables) {
+            obj.disabled = false;
+            if (obj.id !="optional"){
+                obj.required = true;
             }
-            catch{}
+                
+        }
+        for (obj of resizables) {
+            size_changing(obj, 0.45, 0.5);
         }
 
+     
         template_btn = document.getElementById("btn_accept");
         it.parentNode.appendChild(template_btn.content.cloneNode(true));
-        it.setAttribute( "onClick", "denyRowWarsForm(this)" );
+        it.setAttribute( "onClick", "denyRowWarsForm(this)");
     }
 
     function denyRowWarsForm(it){
         it.parentNode.parentNode.remove();    
+    }
+
+    function generateNameOfField(it, where_it="head"){
+        this_row = it.parentNode.parentNode;
+        namables = this_row.querySelectorAll(".to-onload");
+        
+        if(where_it=="head")
+            var name_prefix = "head_";
+        else
+            var name_prefix = "body_";
+
+        const name_suffix = {
+            "name":  "_name",
+            "dtype": "_dtype",
+            "def_val": "_defval"
+          };
+        
+          
+        for(obj of namables){
+            if (it.value.length == 0){
+                obj.removeAttribute("name");
+            }  
+            else{
+            purpose = obj.getAttribute("purpose");
+            obj.name = name_prefix + it.value + name_suffix[purpose];
+            }
+        }
+        
+    }
+
+
+
+    function submitFormUpdatePath(event){
+        // получать информацию о каждой форме через эвент
+        var data = new FormData(event.target);
+        data.append("prjct_name", "{{prjct_name}}");
+        data.append("cn_name", "{{cn_name}}");
+        data_dict = {};
+        for(let [name, value] of data) {
+            data_dict[name] = value;    
+            }
+        url = '/session/api-connection/update-base-data/'
+        console.log(data_dict)
+        fetch(url, {
+            method: 'POST',
+            body: data,
+        }).then(response => response.status)
+        .then(status => {if (status==200){ } })
+        .catch(error => {
+                    console.error(error);
+                }); 
+        // event.target.parentNode.remove();
+        event.preventDefault();
+    }
+    
+    function addNewRouteForm(){
+        container = document.getElementsByClassName('form_connections_container')[0];
+        template = document.getElementById("api_route_form");
+        container.appendChild(template.content.cloneNode(true));
     }
 </script>
 {% endblock %}
@@ -142,19 +213,19 @@
     </div>
     <div class="menu_button_block">
         
-        <div class="menu_button add_connection_menu" onclick="checkConnection(this)">
+        <div class="menu_button add_connection_menu" onclick="addNewRouteForm()">
                 <span class="menu_button_text check_connection connection_check_content_undef">
                     [<span class="connection_check_inner">?</span>]
                 </span>
                 <div class="add_connection menu_botton_subtext_wrapper">
-                    <span class="button_subtext">Check connection</span>
+                    <span class="button_subtext">New api route</span>
                 </div>
             </div>
     </div>
 
 
         <!-- change prefix path -->
-        <form class="ConnectForm" action="" onsubmit="submitForm(event)" >
+        <form class="ConnectForm" action="" onsubmit="submitFormUpdatePath(event)" >
             <div class="form_wrapper_header form_wrapper_connection_empty">
                 <div class="form_header_content">
 
@@ -162,9 +233,21 @@
 
                     <div class="input_form_on_content">
                         <select class="input_selector_api_protocol"  name="protocol" id="ptcl" required>
-                            <option disabled selected value> -- select protocol -- </option>
-                            <option value="HTTP">http://</option>
-                            <option value="PTTPS">https://</option>
+                            <option disabled 
+                                {% if PROTOCOL == ""  %}  
+                                    selected
+                                {% endif %}
+                            value> -- select protocol -- </option>
+                            <option value="HTTP"
+                                {% if PROTOCOL == "HTTP"  %}  
+                                    selected
+                                {% endif %}
+                            >http://</option>
+                            <option
+                                {% if PROTOCOL == "HTTPS"  %}  
+                                    selected
+                                {% endif %} 
+                            value="HTTPS">https://</option>
                         </select>
                     </div>
             
@@ -174,7 +257,7 @@
                     </div>
                     <div class="input_form_on_content" >
                         <input class="to-onload" type="text" placeholder="port" name="port" value="{{PORT}}" required
-                        oninput='size_changing(this); input_into_port_field()'>
+                        oninput='size_changing(this); inputIntoPortField()'>
                     </div>
                     <div class=" no-port input_form_on_content" >
                          :/ 
@@ -184,7 +267,9 @@
                         oninput="size_changing(this)">
             
                     </div>
-                    
+                    <div class="input_form input_form_submit" >
+                        <input type="submit" value="Update">
+                    </div>        
                 </div>
             </div>
         
@@ -195,136 +280,140 @@
 </div>
 <!-- end of menu bar-->
 
-
-
-
-
-
 <!-- create routes -->
 
-
-<div class="form_wrapper" tabindex="-1">
-    <form class="ConnectForm" action="" onsubmit="" >
-        <div class="form_wrapper_header form_wrapper_connection_empty">
-            <div class="form_header_content">
-
-                <div class="api_buttton__connection_form" 
-                style="margin-right: 2rem;"
-                onclick="this.parentNode.parentNode.parentNode.parentNode.remove()">
-                    x
-                </div>
-
-                <div class="input_form_on_content" >
-                    {{results.PROTOCOL}}
-                    <!-- <input type="text" placeholder="driver" name="driver" > -->
-                </div>
-                <div class="input_form_on_content" >
-                    {{HOST}}
-                </div>
-                <div class="input_form_on_content" >
-                    {{SHORTCUT}}
-                </div>
-                <div class="input_form_on_content" >
-                    <input class="to-onload" type="text" placeholder="your/api/path" name="api_path" 
-                    oninput="size_changing(this)">
-                </div>
-                
-                
-            </div>
-        </div>
-        
-        <div class="form_content">
-            
-            <div class="api_head_body_tables_wrapper">
-                <div class="api_head_body_tables_inner_wrapper api_head_body_tables_inner_wrapper_left">
-                    <span>HEAD</span> 
-                    <table>
-                        <tr>
-                            <th></th>
-                            <th>VAR NAME</th>
-                            <th>DTYPE</th>
-                            <th>DEFAULT VAL</th>
-                        </tr>
-                        <!-- form -->
-                        <tr class="deactivated">
-                            <td class="td_with_btn">
-                                <div class="api_buttton__connection_form" 
-                                        onclick="addNewRowVarsForm(this)">
-
-                                        <!-- onclick="this.parentNode.parentNode.parentNode.parentNode.remove()"> -->
-                                        +
-                                </div>
-                            </td>
-                            <td>
-                                <input class="to-onload" type="text" filled="0.45" empty="0.5" placeholder="var name" name="VAR" 
-                                oninput="size_changing(this, 0.45, 0.5)" disabled>
-                            </td>
-                            <td>
-                                <input class="to-onload" type="text" placeholder="your/api/path" name="VAR" 
-                                oninput="size_changing(this, 0.45, 0.5)" disabled>
-                            </td>
-                            <td>
-                                <input class="to-onload" type="text" placeholder="your/api/path" name="VAR" 
-                                oninput="size_changing(this, 0.45, 0.5)" disabled>
-                            </td>
-                            
-                        </tr>
-                        <!-- /form -->
-                    </table>
-                </div>
-                
-                <div class="division"> </div>
-                
-                
-
-                <div class="api_head_body_tables_inner_wrapper api_head_body_tables_inner_wrapper_right">
-                    <span>BODY</span>
-                    <table>
-                        <tr>
-                            <th></th>
-                            <th>VAR NAME</th>
-                            <th>DTYPE</th>
-                            <th>DEFAULT VAL</th>
-                        </tr>
-                        <!-- form -->
-                        <tr class="deactivated">
-                            <td class="td_with_btn">
-                                <div class="api_buttton__connection_form" 
-                                        onclick="addNewRowVarsForm(this)">
-
-                                        <!-- onclick="this.parentNode.parentNode.parentNode.parentNode.remove()"> -->
-                                        +
-                                </div>
-                            </td>
-                            <td>
-                                <input class="to-onload" type="text" filled="0.45" empty="0.5" placeholder="var name" name="VAR" 
-                                oninput="size_changing(this, 0.45, 0.5)" disabled>
-                            </td>
-                            <td>
-                                <input class="to-onload" type="text" placeholder="your/api/path" name="VAR" 
-                                oninput="size_changing(this, 0.45, 0.5)" disabled>
-                            </td>
-                            <td>
-                                <input class="to-onload" type="text" placeholder="your/api/path" name="VAR" 
-                                oninput="size_changing(this, 0.45, 0.5)" disabled>
-                            </td>
-                            
-                        </tr>
-                        <!-- /form -->
-                    </table> 
-                </div>
-            </div>       
-            
-            <!-- submit -->
-            <div class="input_form input_form_submit" >
-                <input type="submit" value="Submit">
-            </div>
-        </div>
-    </form>
+<div class="form_connections_container">
 </div>
 
-
 <!-- TEMPLATES -->
+<template id="api_route_form">
+    <div class="form_wrapper" tabindex="-1">
+        <form class="ConnectForm" action="" onsubmit="" >
+            <div class="form_wrapper_header form_wrapper_connection_empty">
+                <div class="form_header_content">
+
+                    <div class="api_buttton__connection_form" 
+                    style="margin-right: 2rem;"
+                    onclick="this.parentNode.parentNode.parentNode.parentNode.remove()">
+                        x
+                    </div>
+                    {% if PROTOCOL %}
+                    <div class="input_form_on_content" > 
+                        {{PROTOCOL}}://
+                        <!-- <input type="text" placeholder="driver" name="driver" > -->
+                    </div>
+                    {%endif%}
+                    <div class="input_form_on_content" >
+                        {{HOST}}/
+                    </div>
+                    <div class="input_form_on_content" >
+                        {{SHORTCUT}}
+                    </div>
+                    <div class="input_form_on_content" >
+                        <input class="to-onload" type="text" placeholder="your/api/path" name="api_path" required
+                        oninput="size_changing(this)">
+                    </div>
+                    
+                    
+                </div>
+            </div>
+            
+            <div class="form_content">
+                
+                <div class="api_head_body_tables_wrapper">
+                    <div class="api_head_body_tables_inner_wrapper api_head_body_tables_inner_wrapper_left">
+                        <span>HEAD</span> 
+                        <table>
+                            <tr>
+                                <th></th>
+                                <th>VAR NAME</th>
+                                <th>DTYPE</th>
+                                <th>DEFAULT VAL</th>
+                            </tr>
+                            <!-- form -->
+                            <tr class="deactivated">
+                                <td class="td_with_btn">
+                                    <div class="api_buttton__connection_form" 
+                                            onclick="addNewRowVarsForm(this)">
+
+                                            <!-- onclick="this.parentNode.parentNode.parentNode.parentNode.remove()"> -->
+                                            +
+                                    </div>
+                                </td>
+                                <td>
+                                    <input class="to-onload" type="text"  placeholder="var name" text_size_empty="0.45" text_size_filled="0.5" purpose="name"
+                                    oninput="size_changing(this, 0.45, 0.5); generateNameOfField(this)" disabled>
+                                </td>
+                                <td>
+                                    <input class="to-onload" type="text" placeholder="var data type" text_size_empty="0.45" text_size_filled="0.5" purpose="dtype"
+                                    oninput="size_changing(this, 0.45, 0.5)" disabled>
+                                </td>
+                                <td>
+                                    <input class="to-onload" id="optional" type="text" placeholder="defaul value (opt.)" text_size_empty="0.45" text_size_filled="0.5" purpose="def_val"
+                                    oninput="size_changing(this, 0.45, 0.5)" disabled>
+                                </td>
+                                
+                            </tr>
+                            <!-- /form -->
+                        </table>
+                    </div>
+                    
+                    <div class="division"> </div>
+                    
+                    
+
+                    <div class="api_head_body_tables_inner_wrapper api_head_body_tables_inner_wrapper_right">
+                        <span>BODY</span>
+                        <table>
+                            <tr>
+                                <th></th>
+                                <th>VAR NAME</th>
+                                <th>DTYPE</th>
+                                <th>DEFAULT VAL</th>
+                            </tr>
+                            <!-- form -->
+                            <tr class="deactivated">
+                                <td class="td_with_btn">
+                                    <div class="api_buttton__connection_form" 
+                                            onclick="addNewRowVarsForm(this)">
+
+                                            <!-- onclick="this.parentNode.parentNode.parentNode.parentNode.remove()"> -->
+                                            +
+                                    </div>
+                                </td>
+                                <td>
+                                    <input class="to-onload" type="text" placeholder="var name" 
+                                    text_size_empty="0.45" text_size_filled="0.5" purpose="name"
+                                    oninput="size_changing(this, 0.45, 0.5)" disabled>
+                                </td>
+                                <td>
+                                    <input class="to-onload" type="text" placeholder="var data type" text_size_empty="0.45"
+                                    text_size_filled="0.5" purpose="dtype"
+                                    oninput="size_changing(this, 0.45, 0.5)" disabled>
+                                </td>
+                                <td>
+                                    <input class="to-onload" id="optional" type="text" placeholder="defaul value (opt.)"
+                                    text_size_empty="0.45" text_size_filled="0.5" purpose="def_val"
+                                    oninput="size_changing(this, 0.45, 0.5)" disabled>
+                                </td>
+                                
+                            </tr>
+                            <!-- /form -->
+                        </table> 
+                    </div>
+                </div>       
+                
+                <!-- submit -->
+                <div class="input_form input_form_submit" >
+                    <input type="submit" value="Submit">
+                </div>
+            </div>
+        </form>
+    </div>
+</template>
+
+
+
 <template id="api_var_row">
     <tr class="deactivated">
         <td class="td_with_btn">
@@ -334,15 +423,18 @@
             </div>
         </td>
         <td>
-            <input class="to-onload" type="text" filled="0.45" empty="0.5" placeholder="var name" name="HEAD_VAR_NAME" 
+            <input class="to-onload" type="text" placeholder="var name"  
+            text_size_empty="0.45" text_size_filled="0.5" purpose="name"
             oninput="size_changing(this, 0.45, 0.5)" disabled>
         </td>
         <td>
-            <input class="to-onload" type="text" placeholder="your/api/path" name="VAR" 
+            <input class="to-onload" type="text" placeholder="var data type"  
+            text_size_empty="0.45" text_size_filled="0.5" purpose="dtype"
             oninput="size_changing(this, 0.45, 0.5)" disabled>
         </td>
         <td>
-            <input class="to-onload" type="text" placeholder="your/api/path" name="VAR" 
+            <input class="to-onload" id="optional" type="text" placeholder="defaul value (opt.)" 
+            text_size_empty="0.45" text_size_filled="0.5" purpose="def_val"
             oninput="size_changing(this, 0.45, 0.5)" disabled>
         </td>
         
