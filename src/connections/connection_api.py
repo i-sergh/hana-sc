@@ -4,10 +4,11 @@ import json
 from sqlalchemy import select, and_, insert, update
 from sys import stderr
 
-from typing import List, Dict, Any
+
+from typing import List, Dict, Any, Set
 
 try: 
-    from data_storage.models import UseAPIBase, UseProject, UseConnect
+    from data_storage.models import UseAPIBase, UseProject, UseConnect, UseAPIMap, UseAPIVarsHeader, UseAPIVarsBody
     from storage_pgdb import async_session_maker
 except:
     # just for hand tests
@@ -119,16 +120,90 @@ class APIConnection():
     def __str__ (self):
         return self.ROOT
     
-    def add_request_path(self, request_path:str, method:str="GET", headers_params:dict={}, body_variables:dict={}):
+    async def create_request_path(self, request_path:str, method:str='GET', headers_vars:List[Set]|List=[], body_vars:List[Set]|List=[]):
+        # Записать новый path
+        await self._new_path(request_path=request_path, method=method)        
+        # Получить его ID по path & method
+        path_id = await self._get_path_id(request_path=request_path,method=method)
+        # записать headers
+        if len(headers_vars) > 0:
+            await self._add_header_vars_to_path(path_id=path_id, headers=headers_vars)
+        # записать bodys
+        if len(body_vars) > 0:
+            await self._add_body_vars_to_path(path_id=path_id, bodys=body_vars)
+
+        # смапить (???)
+
+    async def _new_path(self,  request_path:str, method:str='GET'):
+        """
+        creates just path in api_map
+        without variables
+        """
+        if self.API_ID == "":
+            raise ValueError("API_ID is None. Probably CN_ID is missing")
+
+        async with async_session_maker() as session:
+            sql =  insert(UseAPIMap).values(
+                        api_id = self.API_ID,
+                        route = request_path,
+                        method = method )
+            
+            await session.execute(sql)
+            await session.commit()
+
+    async def _get_path_id(self,  request_path:str, method:str):
+        """
+        returns path's id from table api_map 
+        """
+        async with async_session_maker() as session:
+
+            sql =  select(UseAPIMap.id).where((UseAPIMap.api_id == self.API_ID) & 
+                                           (UseAPIMap.route == request_path) & 
+                                           (UseAPIMap.method == method))
+        result_raw = (await session.execute(sql)).all()
+        
+        return result_raw[0][0]
+
+    async def _add_header_vars_to_path(self, path_id:int, headers:List[Set]):
+        """
+        headers are [(name, type, default), ... ]
+        """
+        objects = []
+        for header in headers:
+            objects.append(
+                {'api_map_id': path_id, 'var_name':header[0], 'var_type':header[1], 'var_default_val':header[2]}
+            )
+        
+        async with async_session_maker() as session:
+            sql = insert(UseAPIVarsHeader).values(
+                objects
+            )
+            await session.execute(sql)
+            await session.commit()
+
+    async def _add_body_vars_to_path(self, path_id:int, bodys:List[Set]):
+        """
+        bodys are [(name, type, default), ... ]
+        """
+        objects = []
+        for body in bodys:
+            objects.append(
+                {'api_map_id': path_id, 'var_name':body[0], 'var_type':body[1], 'var_default_val':body[2]}
+            )
+        
+        async with async_session_maker() as session:
+            sql = insert(UseAPIVarsBody).values(
+                objects
+            )
+            await session.execute(sql)
+            await session.commit()
+
+
+    def add_request_path_in_mapping(self, request_path:str, method:str="GET", headers_params:dict={}, body_variables:dict={}):
         """
             request_path - full path from ROOT 
             method - GET, POST, PUT, DELETE; TODO: make class to check this as a type 
-            
-            TODO  THIS IS WRONG kwargs - variables of query, look like:
-                    { 
-                        var1: (type), 
-                        var2: (type|type2)
-                    }
+
         """
         if request_path[0] == "/":
             request_path = request_path[1:]
@@ -227,8 +302,7 @@ class APIConnection():
             result_raw = (await session.execute(sql)).all()
             
             self.API_ID = result_raw[0][0] 
-            
-            
+           
             self.API_USER_NAME = result_raw[0][1] if result_raw[0][1] else ""
             self.PASS = result_raw[0][2]  if result_raw[0][2] else ""
             self.HOST = result_raw[0][3]  if result_raw[0][3] else ""
@@ -237,6 +311,17 @@ class APIConnection():
             self.ROOT_PATH = result_raw[0][6]  if result_raw[0][6] else ""
             self._recreate_root_url()
     #TODO: To get results about api routes should use db!!!!    DONE(?)         
+
+    async def load_advanced_data_from_db(self):
+        async with async_session_maker() as session:
+            sql = select(UseAPIMap.id,
+                         UseAPIMap.api_id,
+                         UseAPIMap.route,
+                         UseAPIMap.method).\
+                    where(UseAPIMap.api_id==self.API_ID)
+            result_raw = (await session.execute(sql)).all()
+            print(result_raw)
+
 
     async def init_new_entry_in_db (self):
         if self.CN_ID == "":

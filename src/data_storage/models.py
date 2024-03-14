@@ -54,7 +54,7 @@ class UseAPIBase(StoragePgBase):
 class UseAPIMap(StoragePgBase):
     __tablename__ = "api_map"
     id = Column(Integer, primary_key=True, autoincrement=True)
-    apt_id = Column(Integer, ForeignKey('API.id'))
+    api_id = Column(Integer, ForeignKey('API.id'))
     route = Column(String)
     method = Column(String)
 
@@ -62,13 +62,15 @@ class UseAPIVarsHeader(StoragePgBase):
     __tablename__ = "api_map_header"
     id = Column(Integer, primary_key=True, autoincrement=True)
     api_map_id = Column(Integer, ForeignKey("API_map.id")) 
+    var_name = Column(String)
     var_type = Column(String) 
-    var_val = Column(String)
+    var_default_val = Column(String)
 
 
 class UseAPIVarsBody(StoragePgBase):
     __tablename__ = "api_map_body"
     id = Column(Integer, primary_key=True, autoincrement=True)
     api_map_id = Column(Integer, ForeignKey("API_map.id")) 
+    var_name = Column(String)
     var_type = Column(String) 
-    var_val = Column(String)
+    var_default_val = Column(String)

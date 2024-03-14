@@ -65,7 +65,7 @@ class APIBaseCreate(StoragePgBase):
 class APIMapCreate(StoragePgBase):
     __tablename__ = "api_map"
     id = Column(Integer, primary_key=True, autoincrement=True)
-    apt_id = Column(Integer, ForeignKey('api.id', ondelete='CASCADE'))
+    api_id = Column(Integer, ForeignKey('api.id', ondelete='CASCADE'))
     route = Column(String)
     method = Column(String)
 
@@ -75,8 +75,9 @@ class APIVarsHeaderCreate(StoragePgBase):
     __tablename__ = "api_map_header"
     id = Column(Integer, primary_key=True, autoincrement=True)
     api_map_id = Column(Integer, ForeignKey("api_map.id", ondelete="CASCADE")) 
+    var_name = Column(String)
     var_type = Column(String) # might be lookup table
-    var_val = Column(String)
+    var_default_val = Column(String)
 
     api_maps = relationship(APIMapCreate)
 
@@ -84,15 +85,13 @@ class APIVarsBodyCreate(StoragePgBase):
     __tablename__ = "api_map_body"
     id = Column(Integer, primary_key=True, autoincrement=True)
     api_map_id = Column(Integer, ForeignKey("api_map.id", ondelete="CASCADE")) 
+    var_name = Column(String)
     var_type = Column(String) # might be lookup table
-    var_val = Column(String)
+    var_default_val = Column(String)
 
     api_maps = relationship(APIMapCreate)
 
 
-class APIVarsBodyCreate(StoragePgBase):
-    __tablename__ = "APIS"
-    id = Column(Integer, primary_key=True, autoincrement=True)
 
 
 

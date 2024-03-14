@@ -144,9 +144,6 @@ async def get_project_and_connections(prjct_name:str, session=Depends(get_async_
             r_data_piece['cn_port'] = api.PORT
             r_data_piece['cn_user'] = api.USER
             r_data_piece['cn_pwd'] = api.PASS
-
-            print("data_storage/router: " + r_data_piece['cn_name'] + ' is API')
-            print( r_data_piece )
         if '_sa_instance_state' in r_data_piece:
             '''removes technical information'''
             r_data_piece.pop('_sa_instance_state')

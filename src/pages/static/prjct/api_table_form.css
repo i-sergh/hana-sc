@@ -113,3 +113,19 @@ table{
     color:#ed3120;
     transform: scaleX(95%) scaleY(95%);
 }
+
+.form_api_connections_container{
+    background-color: #4a9af6;
+}
+
+.form_api_wrapper{
+    margin-bottom: 2rem;
+    display: block;
+    margin-right: 5px;
+    background: linear-gradient(90deg, rgba(218,179,255,0.30) 0%, rgba(218,179,255,1) 50%, rgba(218,179,255,0.30) 100%);    
+    transition: 0.3s;
+    width: 100%;
+    /*height: 660px; height: 80px */;
+    overflow: hidden;
+
+}
